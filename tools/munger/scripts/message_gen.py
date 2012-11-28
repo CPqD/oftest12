@@ -211,8 +211,8 @@ message_class_map = {
     "group_mod"                     : "ofp_group_mod",
     "port_mod"                      : "ofp_port_mod",
     "table_mod"                     : "ofp_table_mod",
-    "stats_request"                 : "ofp_stats_request",
-    "stats_reply"                   : "ofp_stats_reply",
+    "multipart_request"                 : "ofp_multipart_request",
+    "multipart_reply"                   : "ofp_multipart_reply",
     "barrier_request"               : "ofp_header",
     "barrier_reply"                 : "ofp_header",
     "queue_get_config_request"      : "ofp_queue_get_config_request",
@@ -485,13 +485,13 @@ def gen_message_wrapper(msg):
 ################################################################
 
 # table and desc stats requests are special with empty body
-extra_ofp_stats_req_defs = """
+extra_ofp_multipart_req_defs = """
 # Stats request bodies for desc and table stats are not defined in the
 # OpenFlow header;  We define them here.  They are empty classes, really
 
-class ofp_desc_stats_request(object):
+class ofp_desc_request(object):
     \"""
-    Forced definition of ofp_desc_stats_request (empty class)
+    Forced definition of ofp_desc_request (empty class)
     \"""
     def __init__(self):
         pass
@@ -502,13 +502,13 @@ class ofp_desc_stats_request(object):
     def __len__(self):
         return 0
     def show(self, prefix=''):
-        return prefix + "ofp_desc_stats_request (empty)\\n"
+        return prefix + "ofp_desc_request (empty)\\n"
     def __eq__(self, other):
         return type(self) == type(other)
     def __ne__(self, other):
         return type(self) != type(other)
 
-OFP_DESC_STATS_REQUEST_BYTES = 0
+OFP_DESC_REQUEST_BYTES = 0
 
 class ofp_table_stats_request(object):
     \"""
@@ -554,16 +554,16 @@ OFP_GROUP_DESC_STATS_REQUEST_BYTES = 0
 
 """
 
-stats_request_template = """
-class --TYPE--_stats_request(ofp_stats_request, ofp_--TYPE--_stats_request):
+multipart_request_template = """
+class --TYPE--_stats_request(ofp_multipart_request, ofp_--TYPE--_stats_request):
     \"""
     Wrapper class for --TYPE-- stats request message
     \"""
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_request.__init__(self)
+        ofp_multipart_request.__init__(self)
         ofp_--TYPE--_stats_request.__init__(self)
-        self.header.type = OFPT_STATS_REQUEST
+        self.header.type = OFPT_MULTIPART_REQUEST
         self.type = --STATS_NAME--
 
     def pack(self, assertstruct=True):
@@ -575,7 +575,7 @@ class --TYPE--_stats_request(ofp_stats_request, ofp_--TYPE--_stats_request):
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_request.unpack(self, binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
         binary_string = ofp_--TYPE--_stats_request.unpack(self, binary_string)
         if len(binary_string) != 0:
             print "ERROR unpacking --TYPE--: extra data"
@@ -611,16 +611,16 @@ class --TYPE--_stats_request(ofp_stats_request, ofp_--TYPE--_stats_request):
 ################################################################
 
 
-# Template for objects stats reply messages
-stats_reply_template = """
-class --TYPE--_stats_reply(ofp_stats_reply):
+# Template for objects multipart reply messages
+multipart_reply_template = """
+class --TYPE--_stats_reply(ofp_multipart_reply):
     \"""
-    Wrapper class for --TYPE-- stats reply
+    Wrapper class for --TYPE-- multipart reply
     \"""
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_reply.__init__(self)
-        self.header.type = OFPT_STATS_REPLY
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
         self.type = --STATS_NAME--
         # stats: Array of type --TYPE--_stats_entry
         self.stats = []
@@ -628,14 +628,14 @@ class --TYPE--_stats_reply(ofp_stats_reply):
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_reply.pack(self)
+        packed += ofp_multipart_reply.pack(self)
         for obj in self.stats:
             packed += obj.pack()
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_reply.unpack(self, binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
         dummy = --TYPE--_stats_entry()
         while len(binary_string) >= len(dummy):
             obj = --TYPE--_stats_entry()
@@ -646,7 +646,7 @@ class --TYPE--_stats_reply(ofp_stats_reply):
         return binary_string
 
     def __len__(self):
-        length = len(self.header) + OFP_STATS_REPLY_BYTES
+        length = len(self.header) + OFP_STATS_MULTIPART_BYTES
         for obj in self.stats:
             length += len(obj)
         return length
@@ -655,7 +655,7 @@ class --TYPE--_stats_reply(ofp_stats_reply):
         outstr = prefix + "--TYPE--_stats_reply\\n"
         outstr += prefix + "ofp header:\\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_reply.show(self)
+        outstr += ofp_multipart_reply.show(self)
         outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\\n'
         for obj in self.stats:
             outstr += obj.show()
@@ -779,18 +779,18 @@ if __name__ == '__main__':
 ################################################################
 """
 
-    print extra_ofp_stats_req_defs
+    print extra_ofp_multipart_req_defs
     print extra_stats_entry_defs
     print flow_stats_entry_def
 
     # Generate stats request and reply subclasses
     for t in stats_types:
-        stats_name = "OFPST_" + t.upper()
-        to_print = re.sub('--TYPE--', t, stats_request_template)
+        stats_name = "OFPMP_" + t.upper()
+        to_print = re.sub('--TYPE--', t, multipart_request_template)
         to_print = re.sub('--TYPE_UPPER--', t.upper(), to_print)
         to_print = re.sub('--STATS_NAME--', stats_name, to_print)
         print to_print
-        to_print = re.sub('--TYPE--', t, stats_reply_template)
+        to_print = re.sub('--TYPE--', t, multipart_reply_template)
         to_print = re.sub('--STATS_NAME--', stats_name, to_print)
         print to_print
 

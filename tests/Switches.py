@@ -169,10 +169,58 @@ class OFReferenceSwitch12(OFSwitch):
             os.kill(self.ofd_op.pid,signal.SIGTERM)
             #self.ofd_op.kill()   ### apparently Popen.kill() requires python 2.6
 
+class OFReferenceSwitch13(OFSwitch):
+    """
+    Start up Ericsson/OpenFlow/CPqD reference switch 13   
+    """
+
+    Name="reference13"
+
+    def __init__(self,interfaces,config):
+        super(OFReferenceSwitch13, self).__init__(interfaces, config)
+        self.config = config
+        if config.of_dir:
+            self.of_dir = os.path.normpath(config.of_dir)
+        else:
+            self.of_dir = os.path.normpath("../../ofsoftswitch13")
+        self.ofd = os.path.normpath(self.of_dir + "/udatapath/ofdatapath")
+        self.ofp = os.path.normpath(self.of_dir + "/secchan/ofprotocol")
+        self.ofd_op = None
+
+
+    def test(self):
+        if not OFSwitch.test(self):
+            return False
+
+        if not os.path.exists(self.ofd):
+            print "Could not find datapath daemon: " + self.ofd
+            return False
+
+        if not os.path.exists(self.ofp):
+            print "Could not find protocol daemon: " + self.ofp
+            return False
+
+        return True
+
+    def start(self):
+        ints = ','.join(self.interfaces)
+        self.ofd_op = subprocess.Popen([self.ofd, "-i", ints, "punix:/tmp/ofd", "-v", ">", "ref13.log"])
+        print "Started ofdatapath on IFs " + ints + \
+                    " with pid " + str(self.ofd_op.pid)
+        subprocess.call([self.ofp, "unix:/tmp/ofd",
+                "tcp:%s:%d" % (self.config.controller_host, self.config.port), "--max-backoff=1"])
+
+    def stop(self):
+        if self.ofd_op:
+            print "Killing ofdatapath on pid: %d" % (self.ofd_op.pid)
+            os.kill(self.ofd_op.pid,signal.SIGTERM)
+            #self.ofd_op.kill()   ### apparently Popen.kill() requires python 2.6
+
 MAP = {
     "ofps" : OFPS,
     "none" : OFSwitch,
     "reference" : OFReferenceSwitch,
-    "reference12":OFReferenceSwitch12,  
+    "reference12":OFReferenceSwitch12, 
+    "reference13":OFReferenceSwitch13, 
     }
     

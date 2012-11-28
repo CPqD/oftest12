@@ -32,13 +32,23 @@
  * experimental OpenFlow version.
  */
  
-#define OFP_VERSION   0x03
+#define OFP_VERSION   0x04
 #define OFP_MAX_TABLE_NAME_LEN 32
 #define OFP_MAX_PORT_NAME_LEN  16
 #define OFP_TCP_PORT  6633
 #define OFP_SSL_PORT  6633
 #define OFP_ETH_ALEN 6          /* Bytes in an Ethernet address. */
 
+/* Header on all OpenFlow packets. */
+struct ofp_header {
+	uint8_t version; /* OFP_VERSION. */
+	uint8_t type;    /* One of the OFPT_ constants. */
+	uint16_t length; /* Length including this ofp_header. */
+	uint32_t xid;    /* Transaction id associated with this packet.
+                        Replies use the same id as was in the request
+                        total_len facilitate pairing. */
+};
+OFP_ASSERT(sizeof(struct ofp_header) == 8);
 
 enum ofp_type {
    /* Immutable messages. */
@@ -64,8 +74,8 @@ enum ofp_type {
     OFPT_PORT_MOD = 16,    /* Controller/switch message */
     OFPT_TABLE_MOD = 17,   /* Controller/switch message */
     /* Statistics messages. */
-    OFPT_STATS_REQUEST = 18, /* Controller/switch message */
-    OFPT_STATS_REPLY = 19,   /* Controller/switch message */
+    OFPT_MULTIPART_REQUEST = 18, /* Controller/switch message */
+    OFPT_MULTIPART_REPLY = 19,   /* Controller/switch message */
     /* Barrier messages. */
     OFPT_BARRIER_REQUEST = 20, /* Controller/switch message */
     OFPT_BARRIER_REPLY = 21,   /* Controller/switch message */
@@ -75,18 +85,13 @@ enum ofp_type {
     /* Controller role change request messages. */
     OFPT_ROLE_REQUEST = 24, /* Controller/switch message */
     OFPT_ROLE_REPLY = 25,   /* Controller/switch message */
+    /* Asynchronous message configuration */
+    OFPT_GET_ASYNC_REQUEST = 26, /* Controller/switch message */
+    OFPT_GET_ASYNC_REPLY   = 27, /* Controller/switch message */
+    OFPT_SET_ASYNC = 28, /* Controller/switch message */
+    /* Meters and rate limiters configuration messages. */
+    OFPT_METER_MOD = 29, /* Controller/switch message */
 };
-
-/* Header on all OpenFlow packets. */
-struct ofp_header {
-        uint8_t version; /* OFP_VERSION. */
-        uint8_t type;    /* One of the OFPT_ constants. */
-        uint16_t length; /* Length including this ofp_header. */
-        uint32_t xid;    /* Transaction id associated with this packet.
-                        Replies use the same id as was in the request
-                        total_len facilitate pairing. */
-};
-OFP_ASSERT(sizeof(struct ofp_header) == 8);
 
 /* OFPT_HELLO.  This message has an empty body, but implementations must
  * ignore any data included in the body, to allow for future extensions. */
@@ -95,6 +100,9 @@ struct ofp_hello {
 };
 
 #define OFP_DEFAULT_MISS_SEND_LEN   128
+
+/******** Common Structures **********************/
+
 
 /* Description of a port */
 struct ofp_port {
@@ -248,8 +256,9 @@ struct ofp_match {
 	* In summary, ofp_match is padded as needed, to make its overall size
 	* a multiple of 8, to preserve alignement in structures using it.
 	*/
+	uint8_t oxm_fields[4]; /* OXMs start here - Make compiler happy */
 };
-OFP_ASSERT(sizeof(struct ofp_match) == 4);
+OFP_ASSERT(sizeof(struct ofp_match) == 8);
 
 /* The match type indicates the match structure (set of fields that compose the
 * match) in use. The match type is placed in the type field at the beginning
@@ -313,6 +322,10 @@ enum oxm_ofb_match_fields {
     OFPXMT_OFB_IPV6_ND_TLL = 33,    /* Target link-layer for ND. */
     OFPXMT_OFB_MPLS_LABEL = 34,     /* MPLS label. */
     OFPXMT_OFB_MPLS_TC = 35,        /* MPLS TC. */
+    OFPXMT_OFP_MPLS_BOS = 36,       /* MPLS BoS bit. */
+    OFPXMT_OFB_PBB_ISID = 37,       /* PBB I-SID. */
+    OFPXMT_OFB_TUNNEL_ID = 38,      /* Logical Port Metadata. */
+    OFPXMT_OFB_IPV6_EXTHDR = 39     /* IPv6 Extension Header pseudo-field */
 };
 
 /* The VLAN id is 12-bits, so we can use the entire 16 bits to indicate
@@ -321,6 +334,19 @@ enum oxm_ofb_match_fields {
 enum ofp_vlan_id {
     OFPVID_PRESENT = 0x1000, /* Bit that indicate that a VLAN id is set */
     OFPVID_NONE = 0x0000,    /* No VLAN id was set. */
+};
+
+/* Bit definitions for IPv6 Extension Header pseudo-field. */
+enum ofp_ipv6exthdr_flags {
+    OFPIEH_NONEXT = 1 << 0, /* "No next header" encountered. */
+    OFPIEH_ESP = 1 << 1, /* Encrypted Sec Payload header present. */
+    OFPIEH_AUTH = 1 << 2, /* Authentication header present. */
+    OFPIEH_DEST = 1 << 3, /* 1 or 2 dest headers present. */
+    OFPIEH_FRAG = 1 << 4, /* Fragment header present. */
+    OFPIEH_ROUTER = 1 << 5, /* Router header present. */
+    OFPIEH_HOP = 1 << 6, /* Hop-by-hop header present. */
+    OFPIEH_UNREP = 1 << 7, /* Unexpected repeats encountered. */
+    OFPIEH_UNSEQ = 1 << 8, /* Unexpected sequencing encountered. */
 };
 
 /* Header for OXM experimenter match fields. */
@@ -340,6 +366,8 @@ enum ofp_instruction_type {
     OFPIT_APPLY_ACTIONS = 4,    /* Applies the action(s) immediately */
     OFPIT_CLEAR_ACTIONS = 5,    /* Clears all actions from the datapath
                                    action set */
+    OFPIT_METER = 6,            /* Apply meter (rate limiter) */
+                                   
     OFPIT_EXPERIMENTER = 0xFFFF /* Experimenter instruction */
 };
 
@@ -394,6 +422,15 @@ struct ofp_instruction_actions {
 };
 OFP_ASSERT(sizeof(struct ofp_instruction_actions) == 8);
 
+/* Instruction structure for OFPIT_METER */
+struct ofp_instruction_meter {
+    uint16_t type; /* OFPIT_METER */
+    uint16_t len;  /* Length is 8. */
+    uint32_t meter_id; /* Meter instance. */
+};
+OFP_ASSERT(sizeof(struct ofp_instruction_meter) == 8);
+
+
 enum ofp_action_type {
     OFPAT_OUTPUT = 0,        /* Output to switch port. */
     OFPAT_COPY_TTL_OUT = 11, /* Copy TTL "outwards" -- from next-to-outermost
@@ -411,6 +448,8 @@ enum ofp_action_type {
     OFPAT_SET_NW_TTL = 23,   /* IP TTL. */
     OFPAT_DEC_NW_TTL = 24,   /* Decrement IP TTL. */
     OFPAT_SET_FIELD = 25,    /* Set a header field using OXM TLV format. */
+    OFPAT_PUSH_PBB = 26,     /*Push a new PBB service tag (I-TAG) */
+    OFPAT_POP_PBB = 27,      /* Pop the outer PBB service tag (I-TAG) */
     OFPAT_EXPERIMENTER = 0xffff
 };
 
@@ -473,9 +512,9 @@ struct ofp_action_nw_ttl {
 };
 OFP_ASSERT(sizeof(struct ofp_action_nw_ttl) == 8);
 
-/* Action structure for OFPAT_PUSH_VLAN/MPLS. */
+/* Action structure for OFPAT_PUSH_VLAN/MPLS/PBB. */
 struct ofp_action_push {
-	uint16_t type;      /* OFPAT_PUSH_VLAN/MPLS. */
+	uint16_t type;      /* OFPAT_PUSH_VLAN/MPLS/PBB. */
 	uint16_t len;       /* Length is 8. */
 	uint16_t ethertype; /* Ethertype */
 	uint8_t pad[2];
@@ -515,6 +554,9 @@ struct ofp_action_experimenter_header {
 };
 OFP_ASSERT(sizeof(struct ofp_action_experimenter_header) == 8);
 
+
+/*************Controller-to-Switch Messages******************/
+
 /* Switch features. */
 struct ofp_switch_features {
 	struct ofp_header header;
@@ -523,14 +565,11 @@ struct ofp_switch_features {
                                  implementer-defined. */
 	uint32_t n_buffers;       /* Max packets buffered at once. */
 	uint8_t n_tables;         /* Number of tables supported by datapath. */
-	uint8_t pad[3];           /* Align to 64-bits. */
+	uint8_t auxiliary_id;     /* Identify auxiliary connections. */
+	uint8_t pad[2];           /* Align to 64-bits. */
 	/* Features. */
 	uint32_t capabilities;    /* Bitmap of support "ofp_capabilities". */
 	uint32_t reserved;
-	/* Port info.*/
-	struct ofp_port ports[0]; /* Port definitions. The number of ports
-                                is inferred from the length field in
-                                the header. */
 };
 OFP_ASSERT(sizeof(struct ofp_switch_features) == 32);
 
@@ -644,7 +683,9 @@ enum ofp_flow_mod_flags {
     OFPFF_SEND_FLOW_REM = 1 << 0, /* Send flow removed message when flow
                                    * expires or is deleted. */
     OFPFF_CHECK_OVERLAP = 1 << 1, /* Check for overlapping entries first. */
-    OFPFF_RESET_COUNTS = 1 << 2   /* Reset flow packet and byte counts. */
+    OFPFF_RESET_COUNTS = 1 << 2,   /* Reset flow packet and byte counts. */
+    OFPFF_NO_PKT_COUNTS = 1 << 3,  /* Don’t keep track of packet count. */
+    OFPFF_NO_BYT_COUNTS = 1 << 4  /*Don’t keep track of byte count. */
 };
 
 /* Group numbering. Groups can use any number up to OFPG_MAX. */
@@ -657,10 +698,8 @@ enum ofp_group {
                                       commands. */
     OFPG_ANY        = 0xffffffff   /* Wildcard group used only for flow stats
                                       requests. Selects all flows regardless of
-                                      group (including flows with no group).
-                                      */
+                                      group (including flows with no group).*/
 };
-
 
 /* Bucket for use in groups. */
 struct ofp_bucket {
@@ -730,86 +769,204 @@ struct ofp_port_mod {
 };
 OFP_ASSERT(sizeof(struct ofp_port_mod) == 40);
 
-struct ofp_stats_request {
+/* Common header for all meter bands */
+struct ofp_meter_band_header {
+    uint16_t type; /* One of OFPMBT_*. */
+    uint16_t len;  /* Length in bytes of this band. */
+    uint32_t rate; /* Rate for this band. */
+    uint32_t burst_size; /* Size of bursts. */
+};
+OFP_ASSERT(sizeof(struct ofp_meter_band_header) == 12);
+
+/* Meter configuration. OFPT_METER_MOD. */
+struct ofp_meter_mod {
+    struct ofp_header header;
+    uint16_t command;  /* One of OFPMC_*. */
+    uint16_t flags;    /* One of OFPMF_*. */   
+    uint32_t meter_id; /* Meter instance. */
+    struct ofp_meter_band_header bands[0]; /* The bands length is
+                                              inferred from the length field
+                                              in the header. */
+};
+OFP_ASSERT(sizeof(struct ofp_meter_mod) == 16);
+
+/* Meter numbering. Flow meters can use any number up to OFPM_MAX. */
+enum ofp_meter {
+    /* Last usable meter. */
+    OFPM_MAX = 0xffff0000,
+    /* Virtual meters. */
+    OFPM_SLOWPATH = 0xfffffffd,
+    OFPM_CONTROLLER = 0xfffffffe,
+    OFPM_ALL = 0xffffffff, /* Meter for slow datapath, if any. */
+                           /* Meter for controller connection. */
+                           /* Represents all meters for stat requests
+                           commands. */
+};
+
+/* Meter commands */
+enum ofp_meter_mod_command {
+    OFPMC_ADD,    /* New meter. */
+    OFPMC_MODIFY, /* Modify specified meter. */
+    OFPMC_DELETE, /* Delete specified meter. */
+};
+
+/* Meter configuration flags */
+enum ofp_meter_flags {
+    OFPMF_KBPS = 1 << 0,  /* Rate value in kb/s (kilo-bit per second). */
+    OFPMF_PKTPS = 1 << 1, /* Rate value in packet/sec. */
+    OFPMF_BURST = 1 << 2, /* Do burst size. */
+    OFPMF_STATS = 1 << 3, /* Collect statistics. */
+};
+
+
+/* Meter band types */
+enum ofp_meter_band_type {
+    OFPMBT_DROP = 1, /* Drop packet. */
+    OFPMBT_DSCP_REMARK = 2, /* Remark DSCP in the IP header. */
+    OFPMBT_EXPERIMENTER = 0xFFFF /* Experimenter meter band. */
+};
+
+/* OFPMBT_DROP band - drop packets */
+struct ofp_meter_band_drop {
+    uint16_t type; /* OFPMBT_DROP. */
+    uint16_t len;  /* Length in bytes of this band. */
+    uint32_t rate; /* Rate for dropping packets. */
+    uint32_t burst_size; /* Size of bursts. */
+    uint8_t pad[4];
+};
+OFP_ASSERT(sizeof(struct ofp_meter_band_drop) == 16);
+
+/* OFPMBT_DSCP_REMARK band - Remark DSCP in the IP header */
+struct ofp_meter_band_dscp_remark {
+    uint16_t type; /* OFPMBT_DSCP_REMARK. */
+    uint16_t len;  /* Length in bytes of this band. */
+    uint32_t rate; /* Rate for remarking packets. */
+    uint32_t burst_size; /* Size of bursts. */
+    uint8_t prec_level; /* Number of precendence level to substract. */
+    uint8_t pad[3];
+};
+OFP_ASSERT(sizeof(struct ofp_meter_band_dscp_remark) == 16);
+
+/* OFPMBT_EXPERIMENTER band - Write actions in action set */
+struct ofp_meter_band_experimenter {
+    uint16_t type; /* One of OFPMBT_*. */
+    uint16_t len;  /* Length in bytes of this band. */
+    uint32_t rate; /* Rate for this band. */
+    uint32_t burst_size; /* Size of bursts. */
+    uint32_t experimenter; /* Experimenter ID which takes the same
+                            form as in struct
+                            ofp_experimenter_header. */
+};
+OFP_ASSERT(sizeof(struct ofp_meter_band_experimenter) == 16);
+
+
+struct ofp_multipart_request {
 	struct ofp_header header;
-	uint16_t type;   /* One of the OFPST_* constants. */
-	uint16_t flags;  /* OFPSF_REQ_* flags (none yet defined). */
+	uint16_t type;   /* One of the OFPMP_* constants. */
+	uint16_t flags;  /* OFPMP_REQ_* flags (none yet defined). */
 	uint8_t pad[4];
 	uint8_t body[0]; /* Body of the request. */
 };
-OFP_ASSERT(sizeof(struct ofp_stats_request) == 16);
+OFP_ASSERT(sizeof(struct ofp_multipart_request) == 16);
 
-enum ofp_stats_reply_flags {
-    OFPSF_REPLY_MORE  = 1 << 0  /* More replies to follow. */
+enum ofp_multipart_request_flags {
+    OFPMPF_REQ_MORE = 1 << 0 /* More requests to follow. */
 };
 
-struct ofp_stats_reply {
+enum ofp_multipart_reply_flags {
+    OFPMPF_REPLY_MORE  = 1 << 0  /* More replies to follow. */
+};
+
+struct ofp_multipart_reply {
 	struct ofp_header header;
-	uint16_t type;   /* One of the OFPST_* constants. */
-	uint16_t flags;  /* OFPSF_REPLY_* flags. */
+	uint16_t type;   /* One of the OFPMP_* constants. */
+	uint16_t flags;  /* OFPMP_REPLY_* flags. */
 	uint8_t pad[4];
 	uint8_t body[0]; /* Body of the reply. */
 };
-OFP_ASSERT(sizeof(struct ofp_stats_reply) == 16);
+OFP_ASSERT(sizeof(struct ofp_multipart_reply) == 16);
 
-enum ofp_stats_types {
+enum ofp_multipart_types {
     /* Description of this OpenFlow switch.
     * The request body is empty.
-    * The reply body is struct ofp_desc_stats. */
-    OFPST_DESC = 0,
+    * The reply body is struct ofp_desc. */
+    OFPMP_DESC = 0,
     /* Individual flow statistics.
-    * The request body is struct ofp_flow_stats_request.
+    * The request body is struct ofp_flow_multipart_request.
     * The reply body is an array of struct ofp_flow_stats. */
-    OFPST_FLOW = 1,
+    OFPMP_FLOW = 1,
     /* Aggregate flow statistics.
     * The request body is struct ofp_aggregate_stats_request.
     * The reply body is struct ofp_aggregate_stats_reply. */
-    OFPST_AGGREGATE = 2,
+    OFPMP_AGGREGATE = 2,
     /* Flow table statistics.
     * The request body is empty.
     * The reply body is an array of struct ofp_table_stats. */
-    OFPST_TABLE = 3,
+    OFPMP_TABLE = 3,
     /* Port statistics.
     * The request body is struct ofp_port_stats_request.
     * The reply body is an array of struct ofp_port_stats. */
-    OFPST_PORT = 4,
+    OFPMP_PORT_STATS = 4,
     /* Queue statistics for a port
     * The request body is struct ofp_queue_stats_request.
     * The reply body is an array of struct ofp_queue_stats */
-    OFPST_QUEUE = 5,
+    OFPMP_QUEUE = 5,
     /* Group counter statistics.
     * The request body is struct ofp_group_stats_request.
     * The reply is an array of struct ofp_group_stats. */
-    OFPST_GROUP = 6,
+    OFPMP_GROUP = 6,
     /* Group description statistics.
     * The request body is empty.
     * The reply body is an array of struct ofp_group_desc_stats. */
-    OFPST_GROUP_DESC = 7,
+    OFPMP_GROUP_DESC = 7,
     /* Group features.
     * The request body is empty.
     * The reply body is struct ofp_group_features_stats. */
-    OFPST_GROUP_FEATURES = 8,
+    OFPMP_GROUP_FEATURES = 8,
+    /* Meter statistics.
+     * The request body is struct ofp_meter_multipart_requests.
+     * The reply body is an array of struct ofp_meter_stats. */
+    OFPMP_METER = 9,
+    /* Meter configuration.
+    * The request body is struct ofp_meter_multipart_requests.
+    * The reply body is an array of struct ofp_meter_config. */
+    OFPMP_METER_CONFIG = 10,
+    /* Meter features.
+    * The request body is empty.
+    * The reply body is struct ofp_meter_features. */
+    OFPMP_METER_FEATURES = 11,
+    /* Table features.
+    * The request body is either empty or contains an array of
+    * struct ofp_table_features containing the controller’s
+    * desired view of the switch. If the switch is unable to
+    * set the specified view an error is returned.
+    * The reply body is an array of struct ofp_table_features. */
+    OFPMP_TABLE_FEATURES = 12,
+    /* Port description.
+    * The request body is empty.
+    * The reply body is an array of struct ofp_port. */
+    OFPMP_PORT_DESC = 13,
     /* Experimenter extension.
     * The request and reply bodies begin with
     * struct ofp_experimenter_stats_header.
     * The request and reply bodies are otherwise experimenter-defined. */
-    OFPST_EXPERIMENTER = 0xffff
+    OFPMP_EXPERIMENTER = 0xffff
 };
 
 #define DESC_STR_LEN   256
 #define SERIAL_NUM_LEN 32
-/* Body of reply to OFPST_DESC request. Each entry is a NULL-terminated
+/* Body of reply to OFPMP_DESC request. Each entry is a NULL-terminated
 * ASCII string. */
-struct ofp_desc_stats {
+struct ofp_desc {
 	char mfr_desc[DESC_STR_LEN];     /* Manufacturer description. */
 	char hw_desc[DESC_STR_LEN];      /* Hardware description. */
 	char sw_desc[DESC_STR_LEN];      /* Software description. */
 	char serial_num[SERIAL_NUM_LEN]; /* Serial number. */
 	char dp_desc[DESC_STR_LEN];      /* Human readable description of datapath. */
 };
-OFP_ASSERT(sizeof(struct ofp_desc_stats) == 1056);
+OFP_ASSERT(sizeof(struct ofp_desc) == 1056);
 
-/* Body for ofp_stats_request of type OFPST_FLOW. */
+/* Body for ofp_multipart_request of type OFPMP_FLOW. */
 struct ofp_flow_stats_request {
 	uint8_t table_id;       /* ID of table to read (from ofp_table_stats),
                                OFPTT_ALL for all tables. */
@@ -830,7 +987,7 @@ struct ofp_flow_stats_request {
 };
 OFP_ASSERT(sizeof(struct ofp_flow_stats_request) == 40);
 
-/* Body of reply to OFPST_FLOW request. */
+/* Body of reply to OFPMP_FLOW request. */
 struct ofp_flow_stats {
 	uint16_t length;        /* Length of this entry. */
 	uint8_t table_id;       /* ID of table flow came from. */
@@ -850,7 +1007,7 @@ struct ofp_flow_stats {
 };
 OFP_ASSERT(sizeof(struct ofp_flow_stats) == 56);
 
-/* Body for ofp_stats_request of type OFPST_AGGREGATE. */
+/* Body for ofp_multipart_request of type OFPMP_AGGREGATE. */
 struct ofp_aggregate_stats_request {
 	uint8_t table_id;       /* ID of table to read (from ofp_table_stats)
                                OFPTT_ALL for all tables. */
@@ -871,7 +1028,7 @@ struct ofp_aggregate_stats_request {
 };
 OFP_ASSERT(sizeof(struct ofp_aggregate_stats_request) == 40);
 
-/* Body of reply to OFPST_AGGREGATE request. */
+/* Body of reply to OFPMP_AGGREGATE request. */
 struct ofp_aggregate_stats_reply {
 	uint64_t packet_count; /* Number of packets in flows. */
 	uint64_t byte_count;   /* Number of bytes in flows. */
@@ -880,38 +1037,142 @@ struct ofp_aggregate_stats_reply {
 };
 OFP_ASSERT(sizeof(struct ofp_aggregate_stats_reply) == 24);
 
-/* Body of reply to OFPST_TABLE request. */
+/* Body of reply to OFPMP_TABLE request. */
 struct ofp_table_stats {
-	uint8_t table_id;        /* Identifier of table. Lower numbered tables
-                                are consulted first. */
-	uint8_t pad[7];          /* Align to 64-bits. */
-	char name[OFP_MAX_TABLE_NAME_LEN];
-	uint64_t match;          /* Bitmap of (1 << OFPXMT_*) that indicate the
-                               fields the table can match on. */
-	uint64_t wildcards;      /* Bitmap of (1 << OFPXMT_*) wildcards that are
-                                supported by the table. */
-	uint32_t write_actions;  /* Bitmap of OFPAT_* that are supported
-                               by the table with OFPIT_WRITE_ACTIONS. */
-	uint32_t apply_actions;  /* Bitmap of OFPAT_* that are supported
-                                by the table with OFPIT_APPLY_ACTIONS. */
-	uint64_t write_setfields;/* Bitmap of (1 << OFPXMT_*) header fields that
-                                can be set with OFPIT_WRITE_ACTIONS. */
-	uint64_t apply_setfields;/* Bitmap of (1 << OFPXMT_*) header fields that
-                                uint64_t metadata_match;*/ 
-    uint64_t metadata_match; /* Bits of metadata table can match. */
-	uint64_t metadata_write; /* Bits of metadata table can write. */
-	uint32_t instructions;   /* Bitmap of OFPIT_* values supported. */
-	uint32_t config;         /* Bitmap of OFPTC_* values */
-	uint32_t max_entries;    /* Max number of entries supported. */
-	uint32_t active_count;   /* Number of active entries. */
-	uint64_t lookup_count;   /* Number of packets looked up in table. */
-	uint64_t matched_count;  /* Number of packets that hit table. */
+    uint8_t table_id;       /* Identifier of table. Lower numbered tables
+                               are consulted first. */
+    uint8_t pad[3];         /* Align to 32-bits. */
+    uint32_t active_count;  /* Number of active entries. */
+    uint64_t lookup_count;  /* Number of packets looked up in table. */
+    uint64_t matched_count; /* Number of packets that hit table. */
 };
-OFP_ASSERT(sizeof(struct ofp_table_stats) == 120);
+OFP_ASSERT(sizeof(struct ofp_table_stats) == 24);
 
-/* Body for ofp_stats_request of type OFPST_PORT. */
+struct ofp_table_feature_prop_header{
+    uint16_t type;  /* One of OFPTFPT_NEXT_TABLES,
+                       OFPTFPT_NEXT_TABLES_MISS. */
+    uint16_t length; /* Length in bytes of this property. */
+
+    uint8_t pad[4];
+};
+OFP_ASSERT(sizeof(struct ofp_table_feature_prop_header) == 8);
+
+/* Body for ofp_multipart_request of type OFPMP_TABLE_FEATURES./
+* Body of reply to OFPMP_TABLE_FEATURES request. */
+struct ofp_table_features {
+    uint16_t length;  /* Length is padded to 64 bits. */
+    uint8_t table_id; /* Identifier of table. Lower numbered tables
+                         are consulted first. */
+    uint8_t pad[5];   /* Align to 64-bits. */
+    char name[OFP_MAX_TABLE_NAME_LEN];
+    uint64_t metadata_match; /* Bits of metadata table can match. */
+    uint64_t metadata_write; /* Bits of metadata table can write. */
+    uint32_t config;         /* Bitmap of OFPTC_* values */
+    uint32_t max_entries;    /* Max number of entries supported. */
+    /* Table Feature Property list */
+    struct ofp_table_feature_prop_header properties[0];
+};
+OFP_ASSERT(sizeof(struct ofp_table_features) == 64);
+
+/* Table Feature property types.
+* Low order bit cleared indicates a property for a regular Flow Entry.
+* Low order bit set indicates a property for the Table-Miss Flow Entry.
+*/
+enum ofp_table_feature_prop_type {
+    OFPTFPT_INSTRUCTIONS = 0, /* Instructions property. */
+    OFPTFPT_INSTRUCTIONS_MISS = 1, /* Instructions for table-miss. */
+    OFPTFPT_NEXT_TABLES = 2, /* Next Table property. */
+    OFPTFPT_NEXT_TABLES_MISS = 3, /* Next Table for table-miss. */
+    OFPTFPT_WRITE_ACTIONS = 4, /* Write Actions property. */
+    OFPTFPT_WRITE_ACTIONS_MISS = 5, /* Write Actions for table-miss. */
+    OFPTFPT_APPLY_ACTIONS = 6, /* Apply Actions property. */
+    OFPTFPT_APPLY_ACTIONS_MISS = 7, /* Apply Actions for table-miss. */
+    OFPTFPT_MATCH = 8, /* Match property. */
+    OFPTFPT_WILDCARDS = 10, /* Wildcards property. */
+    OFPTFPT_WRITE_SETFIELD = 12, /* Write Set-Field property. */
+    OFPTFPT_WRITE_SETFIELD_MISS = 13, /* Write Set-Field for table-miss. */
+    OFPTFPT_APPLY_SETFIELD  = 14, /* Apply Set-Field property. */
+    OFPTFPT_APPLY_SETFIELD_MISS = 15, /* Apply Set-Field for table-miss. */
+    OFPTFPT_EXPERIMENTER = 0xFFFE, /* Experimenter property. */
+    OFPTFPT_EXPERIMENTER_MISS = 0xFFFF, /* Experimenter for table-miss. */
+};
+
+/* Instructions property */
+struct ofp_table_feature_prop_instructions {
+    uint16_t type; /* One of OFPTFPT_INSTRUCTIONS,
+                      OFPTFPT_INSTRUCTIONS_MISS. */
+    uint16_t length; /* Length in bytes of this property. */
+    /* Followed by:
+    *
+    - Exactly (length - 4) bytes containing the instruction ids, then
+    *
+    - Exactly (length + 7)/8*8 - (length) (between 0 and 7)
+    *
+    bytes of all-zero bytes */
+    struct ofp_instruction instruction_ids[0]; /* List of instructions */
+};
+OFP_ASSERT(sizeof(struct ofp_table_feature_prop_instructions) == 4);
+
+
+struct ofp_table_feature_prop_next_tables {
+    uint16_t type;   /* One of OFPTFPT_NEXT_TABLES,
+                       OFPTFPT_NEXT_TABLES_MISS. */
+    uint16_t length; /* Length in bytes of this property. */
+    /* Followed by:
+    *
+    - Exactly (length - 4) bytes containing the table_ids, then
+    *
+    - Exactly (length + 7)/8*8 - (length) (between 0 and 7)
+    *
+    bytes of all-zero bytes */
+    uint8_t next_table_ids[0];
+};
+OFP_ASSERT(sizeof(struct ofp_table_feature_prop_next_tables) == 4);
+
+/* Actions property */
+struct ofp_table_feature_prop_actions {
+    uint16_t type; /* One of OFPTFPT_WRITE_ACTIONS,
+                      OFPTFPT_WRITE_ACTIONS_MISS,
+                      OFPTFPT_APPLY_ACTIONS,
+                      OFPTFPT_APPLY_ACTIONS_MISS. */
+
+    uint16_t length; /* Length in bytes of this property. */
+    /* Followed by:
+    *
+    - Exactly (length - 4) bytes containing the action_ids, then
+    *
+    - Exactly (length + 7)/8*8 - (length) (between 0 and 7)
+    *
+    bytes of all-zero bytes */
+    struct ofp_action_header action_ids[0];/* List of actions */
+};
+OFP_ASSERT(sizeof(struct ofp_table_feature_prop_actions) == 4);
+
+/* Match, Wildcard or Set-Field property */
+struct ofp_table_feature_prop_oxm {
+    uint16_t type; /* One of OFPTFPT_MATCH,
+                      OFPTFPT_WILDCARDS,
+                      OFPTFPT_WRITE_SETFIELD,
+                      OFPTFPT_WRITE_SETFIELD_MISS,
+                      OFPTFPT_APPLY_SETFIELD,
+                      OFPTFPT_APPLY_SETFIELD_MISS. */
+
+    uint16_t length; /* Length in bytes of this property. */
+    /* Followed by:
+    *
+    - Exactly (length - 4) bytes containing the oxm_ids, then
+    *
+    - Exactly (length + 7)/8*8 - (length) (between 0 and 7)
+    *
+    bytes of all-zero bytes */
+    uint32_t oxm_ids[0]; /* Array of OXM headers */
+};
+OFP_ASSERT(sizeof(struct ofp_table_feature_prop_oxm) == 4);
+
+
+/* Body for ofp_multipart_request of type OFPMP_PORT_STATS. */
 struct ofp_port_stats_request {
-	uint32_t port_no; /* OFPST_PORT message must request statistics
+	uint32_t port_no; /* OFPMP_PORT_STATS message must request statistics
                        * either for a single port (specified in
                        * port_no) or for all ports (if port_no ==
                        * OFPP_ANY). */
@@ -919,7 +1180,7 @@ struct ofp_port_stats_request {
 };
 OFP_ASSERT(sizeof(struct ofp_port_stats_request) == 8);
 
-/* Body of reply to OFPST_PORT request. If a counter is unsupported, set
+/* Body of reply to OFPMP_PORT_STATS request. If a counter is unsupported, set
 * the field to all ones. */
 struct ofp_port_stats {
 	uint32_t port_no;
@@ -942,8 +1203,11 @@ struct ofp_port_stats {
 	uint64_t rx_over_err;  /* Number of packets with RX overrun. */
 	uint64_t rx_crc_err;   /* Number of CRC errors. */
 	uint64_t collisions;   /* Number of collisions. */
+	uint32_t duration_sec; /* Time port has been alive in seconds. */
+	uint32_t duration_nsec; /* Time port has been alive in nanoseconds beyond
+                              duration_sec. */
 };
-OFP_ASSERT(sizeof(struct ofp_port_stats) == 104);
+OFP_ASSERT(sizeof(struct ofp_port_stats) == 112);
 
 struct ofp_queue_stats_request {
 	uint32_t port_no;  /* All ports if OFPP_ANY. */
@@ -957,10 +1221,13 @@ struct ofp_queue_stats {
 	uint64_t tx_bytes;   /* Number of transmitted bytes. */
 	uint64_t tx_packets; /* Number of transmitted packets. */
 	uint64_t tx_errors;  /* Number of packets dropped due to overrun. */
+	uint32_t duration_sec; /* Time queue has been alive in seconds. */
+    uint32_t duration_nsec; /* Time queue has been alive in nanoseconds beyond
+                                duration_sec. */
 };
-OFP_ASSERT(sizeof(struct ofp_queue_stats) == 32);
+OFP_ASSERT(sizeof(struct ofp_queue_stats) == 40);
 
-/* Body of OFPST_GROUP request. */
+/* Body of OFPMP_GROUP request. */
 struct ofp_group_stats_request {
 	uint32_t group_id; /* All groups if OFPG_ALL. */
 	uint8_t pad[4];    /* Align to 64 bits. */
@@ -974,7 +1241,7 @@ struct ofp_bucket_counter {
 };
 OFP_ASSERT(sizeof(struct ofp_bucket_counter) == 16);
 
-/* Body of reply to OFPST_GROUP request. */
+/* Body of reply to OFPMP_GROUP request. */
 struct ofp_group_stats {
 	uint16_t length;       /* Length of this entry. */
 	uint8_t pad[2];        /* Align to 64 bits. */
@@ -984,11 +1251,15 @@ struct ofp_group_stats {
 	uint8_t pad2[4];       /* Align to 64 bits. */
 	uint64_t packet_count; /* Number of packets processed by group. */
 	uint64_t byte_count;   /* Number of bytes processed by group. */
+	uint32_t duration_sec; /* Time group has been alive in seconds. */
+    uint32_t duration_nsec; /* Time group has been alive in nanoseconds beyond
+                                duration_sec. */
 	struct ofp_bucket_counter bucket_stats[0];
+	
 };
-OFP_ASSERT(sizeof(struct ofp_group_stats) == 32);
+OFP_ASSERT(sizeof(struct ofp_group_stats) == 40);
 
-/* Body of reply to OFPST_GROUP_DESC request. */
+/* Body of reply to OFPMP_GROUP_DESC request. */
 struct ofp_group_desc_stats {
 	uint16_t length;   /* Length of this entry. */
 	uint8_t type;      /* One of OFPGT_*. */
@@ -998,7 +1269,7 @@ struct ofp_group_desc_stats {
 };
 OFP_ASSERT(sizeof(struct ofp_group_desc_stats) == 8);
 
-/* Body of reply to OFPST_GROUP_FEATURES request. Group features. */
+/* Body of reply to OFPMP_GROUP_FEATURES request. Group features. */
 struct ofp_group_features_stats {
 	uint32_t types;         /* Bitmap of OFPGT_* values supported. */
 	uint32_t capabilities;  /* Bitmap of OFPGFC_* capability supported. */
@@ -1015,7 +1286,59 @@ enum ofp_group_capabilities {
     OFPGFC_CHAINING_CHECKS = 1 << 3, /* Check chaining for loops and delete */
 };
 
-/* Body for ofp_stats_request/reply of type OFPST_EXPERIMENTER. */
+/* Body of OFPMP_METER and OFPMP_METER_CONFIG requests. */
+struct ofp_meter_multipart_request {
+    uint32_t meter_id; /* Meter instance, or OFPM_ALL. */
+    uint8_t pad[4]; /* Align to 64 bits. */
+};
+OFP_ASSERT(sizeof(struct ofp_meter_multipart_request) == 8);
+
+/* Statistics for each meter band */
+struct ofp_meter_band_stats {
+    uint64_t packet_band_count; /* Number of packets in band. */
+    uint64_t byte_band_count; /* Number of bytes in band. */
+};
+OFP_ASSERT(sizeof(struct ofp_meter_band_stats) == 16);
+
+/* Body of reply to OFPMP_METER request. Meter statistics. */
+struct ofp_meter_stats {
+    uint32_t meter_id; /* Meter instance. */
+    uint16_t len;             /* Length in bytes of this stats. */
+    uint8_t pad[6];
+    uint32_t flow_count;      /* Number of flows bound to meter. */
+    uint64_t packet_in_count; /* Number of packets in input. */
+    uint64_t byte_in_count;   /* Number of bytes in input. */
+    uint32_t duration_sec;    /* Time meter has been alive in seconds. */
+    uint32_t duration_nsec;   /* Time meter has been alive in nanoseconds beyond
+                               duration_sec. */
+    struct ofp_meter_band_stats band_stats[0]; /* The band_stats length is
+                                                  inferred from the length field. */
+};
+OFP_ASSERT(sizeof(struct ofp_meter_stats) == 40);
+
+/* Body of reply to OFPMP_METER_CONFIG request. Meter configuration. */
+struct ofp_meter_config {
+    uint16_t length; /* Length of this entry. */
+    uint16_t flags; /* All OFPMC_* that apply. */
+    uint32_t meter_id; /* Meter instance. */
+    struct ofp_meter_band_header bands[0]; /* The bands length is
+                                              inferred from the length field. */
+};
+OFP_ASSERT(sizeof(struct ofp_meter_config) == 8);
+
+/* Body of reply to OFPMP_METER_FEATURES request. Meter features. */
+struct ofp_meter_features {
+    uint32_t max_meter; /* Maximum number of meters. */
+    uint32_t band_types; /* Bitmaps of OFPMBT_* values supported. */
+    uint32_t capabilities; /* Bitmaps of "ofp_meter_flags". */
+    uint8_t max_bands; /* Maximum bands per meters */
+    uint8_t max_color; /* Maximum color value */
+    uint8_t pad[2];
+};
+OFP_ASSERT(sizeof(struct ofp_meter_features) == 16);
+
+
+/* Body for ofp_multipart_request/reply of type OFPMP_EXPERIMENTER. */
 struct ofp_experimenter_stats_header {
 	uint32_t experimenter; /* Experimenter ID which takes the same form
                               as in struct ofp_experimenter_header. */
@@ -1076,6 +1399,17 @@ enum ofp_controller_role {
     OFPCR_ROLE_SLAVE = 3,    /* Read-only access. */
 };
 
+/* Asynchronous message configuration. */
+struct ofp_async_config {
+    struct ofp_header header; /* OFPT_GET_ASYNC_REPLY or OFPT_SET_ASYNC. */
+    uint32_t packet_in_mask[2]; /* Bitmasks of OFPR_* values. */
+    uint32_t port_status_mask[2]; /* Bitmasks of OFPPR_* values. */
+    uint32_t flow_removed_mask[2];/* Bitmasks of OFPRR_* values. */
+};
+OFP_ASSERT(sizeof(struct ofp_async_config) == 32);
+
+
+
 #define OFP_NO_BUFFER 0xffffffff
 
 /* Packet received on port (datapath -> controller). */
@@ -1085,6 +1419,7 @@ struct ofp_packet_in {
 	uint16_t total_len;     /* Full length of frame. */
 	uint8_t reason;         /* Reason packet is being sent (one of OFPR_*) */
 	uint8_t table_id;       /* ID of the table that was looked up */
+    uint64_t cookie;        /* Cookie of the flow entry that was looked up. */
 	struct ofp_match match; /* Packet metadata. Variable size. */
 	/* Followed by:
 	* -Exactly 2 all-zero padding bytes,then
@@ -1095,7 +1430,7 @@ struct ofp_packet_in {
     //uint8_t pad[2]; /* Align to 64 bit + 16 bit */
     //uint8_t data[0]; /* Ethernet frame */
 };
-OFP_ASSERT(sizeof(struct ofp_packet_in) == 24);
+OFP_ASSERT(sizeof(struct ofp_packet_in) == 32);
 
 /* Why is this packet being sent to the controller? */
 enum ofp_packet_in_reason {
@@ -1172,6 +1507,8 @@ enum ofp_error_type {
     OFPET_QUEUE_OP_FAILED = 9,       /* Queue operation failed. */
     OFPET_SWITCH_CONFIG_FAILED = 10, /* Switch config request failed. */
     OFPET_ROLE_REQUEST_FAILED = 11,  /* Controller Role request failed. */
+    OFPET_METER_MOD_FAILED = 12,     /* Error in meter. */
+    OFPET_TABLE_FEATURES_FAILED = 13, /* Setting table features failed. */
     OFPET_EXPERIMENTER = 0xffff      /* Experimenter error messages. */
 };
 
@@ -1187,10 +1524,10 @@ enum ofp_hello_failed_code {
 enum ofp_bad_request_code {
     OFPBRC_BAD_VERSION = 0,      /* ofp_header.version not supported. */
     OFPBRC_BAD_TYPE = 1,         /* ofp_header.type not supported. */
-    OFPBRC_BAD_STAT = 2,         /* ofp_stats_request.type not supported. */
+    OFPBRC_BAD_MULTIPART = 2,         /* ofp_multipart_request.type not supported. */
     OFPBRC_BAD_EXPERIMENTER = 3, /* Experimenter id not supported
                                   * (in ofp_experimenter_header or
-                                  * ofp_stats_request or ofp_stats_reply). */
+                                  * ofp_multipart_request or ofp_multipart_reply). */
     OFPBRC_BAD_EXP_TYPE = 4,     /* Experimenter type not supported. */
     OFPBRC_EPERM = 5,            /* Permissions error. */
     OFPBRC_BAD_LEN = 6,          /* Wrong request length for type. */
@@ -1201,6 +1538,9 @@ enum ofp_bad_request_code {
     OFPBRC_IS_SLAVE = 10,        /* Denied because controller is slave. */
     OFPBRC_BAD_PORT = 11,        /* Invalid port. */
     OFPBRC_BAD_PACKET = 12,      /* Invalid packet in packet-out. */
+    OFPBRC_MULTIPART_BUFFER_OVERFLOW = 13, /* ofp_multipart_request
+                                              overflowed the assigned buffer. */
+
 };
 
 /* ofp_error_msg ’code’ values for OFPET_BAD_ACTION. ’data’ contains at least
@@ -1352,6 +1692,39 @@ enum ofp_role_request_failed_code {
     OFPRRFC_STALE = 0,    /* Stale Message: old generation_id. */
     OFPRRFC_UNSUP = 1,    /* Controller role change unsupported. */
     OFPRRFC_BAD_ROLE = 2, /* Invalid role. */
+};
+
+/* ofp_error_msg ’code’ values for OFPET_METER_MOD_FAILED. ’data’ contains
+* at least the first 64 bytes of the failed request. */
+enum ofp_meter_mod_failed_code {
+    OFPMMFC_UNKNOWN = 0, /* Unspecified error. */
+    OFPMMFC_METER_EXISTS = 1,   /* Meter not added because a Meter ADD
+                                * attempted to replace an existing Meter. */
+    OFPMMFC_INVALID_METER = 2,  /* Meter not added because Meter specified
+                                * is invalid. */
+    OFPMMFC_UNKNOWN_METER = 3,  /* Meter not modified because a Meter
+                                  MODIFY attempted to modify a non-existent
+                                  Meter. */
+    OFPMMFC_BAD_COMMAND = 4,    /* Unsupported or unknown command. */
+    OFPMMFC_BAD_FLAGS = 5,      /* Flag configuration unsupported. */
+    OFPMMFC_BAD_RATE = 6,       /* Rate unsupported. */
+    OFPMMFC_BAD_BURST = 7,      /* Burst size unsupported. */
+    OFPMMFC_BAD_BAND = 8,       /* Band unsupported. */
+    OFPMMFC_BAD_BAND_VALUE = 9, /* Band value unsupported. */
+    OFPMMFC_OUT_OF_METERS = 10, /* No more meters available. */
+    OFPMMFC_OUT_OF_BANDS = 11,  /* The maximum number of properties
+                                 * for a meter has been exceeded. */
+};
+
+/* ofp_error_msg ’code’ values for OFPET_TABLE_FEATURES_FAILED. ’data’ contains
+* at least the first 64 bytes of the failed request. */
+enum ofp_table_features_failed_code {
+    OFPTFFC_BAD_TABLE = 0,    /* Specified table does not exist. */
+    OFPTFFC_BAD_METADATA = 1, /* Invalid metadata mask. */
+    OFPTFFC_BAD_TYPE = 2,     /* Unknown property type. */
+    OFPTFFC_BAD_LEN = 3,      /* Length problem in properties. */
+    OFPTFFC_BAD_ARGUMENT = 4, /* Unsupported property value. */
+    OFPTFFC_EPERM = 5,        /* Permissions error. */
 };
 
 /* OFPET_EXPERIMENTER: Error message (datapath -> controller). */

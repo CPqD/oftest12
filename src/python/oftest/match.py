@@ -748,6 +748,78 @@ class mpls_tc(oxm_tlv):
         outstr += oxm_tlv.show(self, prefix)
         return outstr
 
+class mpls_bos(oxm_tlv):
+    """
+    Wrapper class for mpls_bos match object
+
+    Data members inherited from oxm_tlv:
+    @arg class
+    @arg field
+    @arg hasmask
+    @arg body
+
+    """
+    def __init__(self, value, hasmask = False):
+        oxm_tlv.__init__(self, OFPXMT_OFB_MPLS_BOS, hasmask, 1, value)
+    def show(self, prefix=''):
+        outstr = prefix + "mpls_bos\n"
+        outstr += oxm_tlv.show(self, prefix)
+        return outstr
+        
+class pbb_isid(oxm_tlv):
+    """
+    Wrapper class for pbb_isid match object
+
+    Data members inherited from oxm_tlv:
+    @arg class
+    @arg field
+    @arg hasmask
+    @arg body
+
+    """
+    def __init__(self, value, hasmask = False):
+        oxm_tlv.__init__(self, OFPXMT_OFB_PBB_ISID, hasmask, 4, value)
+    def show(self, prefix=''):
+        outstr = prefix + "pbb_isid\n"
+        outstr += oxm_tlv.show(self, prefix)
+        return outstr        
+
+class tunnel_id(oxm_tlv):
+    """
+    Wrapper class for tunnel_id match object
+
+    Data members inherited from oxm_tlv:
+    @arg class
+    @arg field
+    @arg hasmask
+    @arg body
+
+    """
+    def __init__(self, value, hasmask = False):
+        oxm_tlv.__init__(self, OFPXMT_OFB_TUNNEL_ID, hasmask, 8, value)
+    def show(self, prefix=''):
+        outstr = prefix + "tunnel_id\n"
+        outstr += oxm_tlv.show(self, prefix)
+        return outstr
+        
+class ipv6_exthdr(oxm_tlv):
+    """
+    Wrapper class for ipv6_exthdr match object
+
+    Data members inherited from oxm_tlv:
+    @arg class
+    @arg field
+    @arg hasmask
+    @arg body
+
+    """
+    def __init__(self, value, hasmask = False):
+        oxm_tlv.__init__(self, OFPXMT_OFB_IPV6_EXTHDR, hasmask, 2, value)
+    def show(self, prefix=''):
+        outstr = prefix + "ipv6_exthdr\n"
+        outstr += oxm_tlv.show(self, prefix)
+        return outstr        
+
 match_class_list = (
     in_port,
     in_phy_port,
@@ -784,4 +856,8 @@ match_class_list = (
     ipv6_nd_sll,
     ipv6_nd_tll,
     mpls_label,
-    mpls_tc)
+    mpls_tc,
+    mpls_bos,
+    pbb_isid,
+    tunnel_id,
+    ipv6_exthdr)

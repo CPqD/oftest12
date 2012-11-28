@@ -36,34 +36,46 @@ parse_logger = logging.getLogger("parse")
 
 # These message types are subclassed
 msg_type_subclassed = [
-    ofp.OFPT_STATS_REQUEST,
-    ofp.OFPT_STATS_REPLY,
+    ofp.OFPT_MULTIPART_REQUEST,
+    ofp.OFPT_MULTIPART_REPLY,
     ofp.OFPT_ERROR
 ]
 
 # Maps from sub-types to classes
-stats_reply_to_class_map = {
-    ofp.OFPST_DESC                      : message.desc_stats_reply,
-    ofp.OFPST_FLOW                      : message.flow_stats_reply,
-    ofp.OFPST_AGGREGATE                 : message.aggregate_stats_reply,
-    ofp.OFPST_TABLE                     : message.table_stats_reply,
-    ofp.OFPST_PORT                      : message.port_stats_reply,
-    ofp.OFPST_QUEUE                     : message.queue_stats_reply,
-    ofp.OFPST_GROUP                     : message.group_stats_reply,
-    ofp.OFPST_GROUP_DESC                : message.group_desc_stats_reply
-#    ofp.OFPST_EXPERIMENTER
+multipart_reply_to_class_map = {
+    ofp.OFPMP_DESC                      : message.desc_stats_reply,
+    ofp.OFPMP_FLOW                      : message.flow_stats_reply,
+    ofp.OFPMP_AGGREGATE                 : message.aggregate_stats_reply,
+    ofp.OFPMP_TABLE                     : message.table_stats_reply,
+    ofp.OFPMP_PORT_STATS                : message.port_stats_reply,
+    ofp.OFPMP_QUEUE                     : message.queue_stats_reply,
+    ofp.OFPMP_GROUP                     : message.group_stats_reply,
+    ofp.OFPMP_GROUP_DESC                : message.group_desc_stats_reply,
+    ofp.OFPMP_GROUP_FEATURES            : message.group_features_stats_reply,
+    ofp.OFPMP_METER                     : message.meter_multipart_reply,
+    ofp.OFPMP_METER_CONFIG              : message.meter_config_stats_reply,    
+    ofp.OFPMP_METER_FEATURES            : message.meter_features_stats_reply,
+    ofp.OFPMP_TABLE_FEATURES            : message.table_features_stats_reply,
+    ofp.OFPMP_PORT_DESC                 : message.port_desc_stats_reply
+#    ofp.OFPMP_EXPERIMENTER
 }
 
-stats_request_to_class_map = {
-    ofp.OFPST_DESC                      : message.desc_stats_request,
-    ofp.OFPST_FLOW                      : message.flow_stats_request,
-    ofp.OFPST_AGGREGATE                 : message.aggregate_stats_request,
-    ofp.OFPST_TABLE                     : message.table_stats_request,
-    ofp.OFPST_PORT                      : message.port_stats_request,
-    ofp.OFPST_QUEUE                     : message.queue_stats_request,
-    ofp.OFPST_GROUP                     : message.group_stats_request,
-    ofp.OFPST_GROUP_DESC                : message.group_desc_stats_request
-#    ofp.OFPST_EXPERIMENTER
+multipart_request_to_class_map = {
+    ofp.OFPMP_DESC                      : message.desc_stats_request,
+    ofp.OFPMP_FLOW                      : message.flow_stats_request,
+    ofp.OFPMP_AGGREGATE                 : message.aggregate_stats_request,
+    ofp.OFPMP_TABLE                     : message.table_stats_request,
+    ofp.OFPMP_PORT_STATS                : message.port_stats_request,
+    ofp.OFPMP_QUEUE                     : message.queue_stats_request,
+    ofp.OFPMP_GROUP                     : message.group_stats_request,
+    ofp.OFPMP_GROUP_DESC                : message.group_desc_stats_request,
+    ofp.OFPMP_GROUP_FEATURES            : message.group_features_stats_request,
+    ofp.OFPMP_METER                     : message.meter_multipart_request,
+    ofp.OFPMP_METER_CONFIG              : message.meter_config_stats_request,    
+    ofp.OFPMP_METER_FEATURES            : message.meter_features_stats_request,
+    ofp.OFPMP_TABLE_FEATURES            : message.table_features_stats_request,
+    ofp.OFPMP_PORT_DESC                 : message.port_desc_stats_request
+#    ofp.OFPMP_EXPERIMENTER
 }
 
 error_to_class_map = {
@@ -100,8 +112,8 @@ msg_type_to_class_map = {
     ofp.OFPT_GROUP_MOD                  : message.group_mod,
     ofp.OFPT_PORT_MOD                   : message.port_mod,
     ofp.OFPT_TABLE_MOD                  : message.table_mod,
-    ofp.OFPT_STATS_REQUEST              : message.stats_request,
-    ofp.OFPT_STATS_REPLY                : message.stats_reply,
+    ofp.OFPT_MULTIPART_REQUEST              : message.multipart_request,
+    ofp.OFPT_MULTIPART_REPLY                : message.multipart_reply,
     ofp.OFPT_BARRIER_REQUEST            : message.barrier_request,
     ofp.OFPT_BARRIER_REPLY              : message.barrier_reply,
     ofp.OFPT_QUEUE_GET_CONFIG_REQUEST   : message.queue_get_config_request,
@@ -119,19 +131,19 @@ def _of_message_to_object(binary_string):
     # FIXME: Add error detection
     if not hdr.type in msg_type_subclassed:
         return msg_type_to_class_map[hdr.type]()
-    if hdr.type == ofp.OFPT_STATS_REQUEST:
-        sub_hdr = ofp.ofp_stats_request()
+    if hdr.type == ofp.OFPT_MULTIPART_REQUEST:
+        sub_hdr = ofp.ofp_multipart_request()
         sub_hdr.unpack(binary_string[ofp.OFP_HEADER_BYTES:])
         try:
-            obj = stats_request_to_class_map[sub_hdr.type]()
+            obj = multipart_request_to_class_map[sub_hdr.type]()
         except LookupError:
             obj = None
         return obj
-    elif hdr.type == ofp.OFPT_STATS_REPLY:
-        sub_hdr = ofp.ofp_stats_reply()
+    elif hdr.type == ofp.OFPT_MULTIPART_REPLY:
+        sub_hdr = ofp.ofp_multipart_reply()
         sub_hdr.unpack(binary_string[ofp.OFP_HEADER_BYTES:])
         try:
-            obj = stats_reply_to_class_map[sub_hdr.type]()
+            obj = multipart_reply_to_class_map[sub_hdr.type]()
         except LookupError:
             obj = None
         return obj

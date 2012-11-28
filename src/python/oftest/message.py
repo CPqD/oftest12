@@ -118,7 +118,7 @@ class barrier_reply(object):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_BARRIER_REPLY=21)
 
@@ -211,7 +211,7 @@ class barrier_request(object):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_BARRIER_REQUEST=20)
 
@@ -304,7 +304,7 @@ class echo_reply(object):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_ECHO_REPLY=3)
 
@@ -411,7 +411,7 @@ class echo_request(object):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_ECHO_REQUEST=2)
 
@@ -518,7 +518,7 @@ class error(ofp_error_msg):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_ERROR=1)
 
@@ -634,7 +634,7 @@ class experimenter(ofp_experimenter_header):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_EXPERIMENTER=4)
 
@@ -750,7 +750,7 @@ class features_reply(ofp_switch_features):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_FEATURES_REPLY=6)
 
@@ -758,6 +758,7 @@ class features_reply(ofp_switch_features):
     @arg datapath_id
     @arg n_buffers
     @arg n_tables
+    @arg auxiliary_id
     @arg capabilities
     @arg reserved
     @arg ports: Variable length array of TBD
@@ -869,7 +870,7 @@ class features_request(object):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_FEATURES_REQUEST=5)
 
@@ -954,7 +955,6 @@ class features_request(object):
 
         """
         return not self.__eq__(other)
-    
 
 class flow_mod(ofp_flow_mod):
     """
@@ -962,7 +962,7 @@ class flow_mod(ofp_flow_mod):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_FLOW_MOD=14)
 
@@ -1099,7 +1099,6 @@ class flow_mod(ofp_flow_mod):
 
         """
         return not self.__eq__(other)
-    
 
 class flow_removed(ofp_flow_removed):
     """
@@ -1107,7 +1106,7 @@ class flow_removed(ofp_flow_removed):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_FLOW_REMOVED=11)
 
@@ -1233,7 +1232,7 @@ class get_config_reply(ofp_switch_config):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_GET_CONFIG_REPLY=8)
 
@@ -1335,7 +1334,7 @@ class get_config_request(object):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_GET_CONFIG_REQUEST=7)
 
@@ -1428,7 +1427,7 @@ class group_mod(ofp_group_mod):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_GROUP_MOD=15)
 
@@ -1539,7 +1538,7 @@ class hello(object):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_HELLO=0)
 
@@ -1640,13 +1639,217 @@ class hello(object):
         return not self.__eq__(other)
     
 
+class multipart_reply(ofp_multipart_reply):
+    """
+    Wrapper class for multipart_reply
+
+    OpenFlow message header: length, version, xid, type
+    @arg length: The total length of the message
+    @arg version: The OpenFlow version (4)
+    @arg xid: The transaction ID
+    @arg type: The message type (OFPT_MULTIPART_REPLY=19)
+
+    Data members inherited from ofp_multipart_reply:
+    @arg type
+    @arg flags
+
+    """
+
+    def __init__(self):
+        ofp_multipart_reply.__init__(self)
+        self.header = ofp_header()
+        self.header.type = OFPT_MULTIPART_REPLY
+
+
+    def pack(self):
+        """
+        Pack object into string
+
+        @return The packed string which can go on the wire
+
+        """
+        self.header.length = len(self)
+        packed = self.header.pack()
+
+        packed += ofp_multipart_reply.pack(self)
+        return packed
+
+    def unpack(self, binary_string):
+        """
+        Unpack object from a binary string
+
+        @param binary_string The wire protocol byte string holding the object
+        represented as an array of bytes.
+        @return The remainder of binary_string that was not parsed.
+
+        """
+        binary_string = self.header.unpack(binary_string)
+
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
+        # Fixme: If no self.data, add check for data remaining
+        return binary_string
+
+    def __len__(self):
+        """
+        Return the length of this object once packed into a string
+
+        @return An integer representing the number bytes in the packed
+        string.
+
+        """
+        length = OFP_HEADER_BYTES
+
+        length += ofp_multipart_reply.__len__(self)
+        return length
+
+    def show(self, prefix=''):
+        """
+        Generate a string (with multiple lines) describing the contents
+        of the object in a readable manner
+
+        @param prefix Pre-pended at the beginning of each line.
+
+        """
+
+        outstr = prefix + 'multipart_reply (OFPT_MULTIPART_REPLY)\n'
+        prefix += '  '
+        outstr += prefix + 'ofp header\n'
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_multipart_reply.show(self, prefix)
+        return outstr
+
+    def __eq__(self, other):
+        """
+        Return True if self and other hold the same data
+
+        @param other Other object in comparison
+
+        """
+        if type(self) != type(other): return False
+        if not self.header.__eq__(other.header): return False
+
+        if not ofp_multipart_reply.__eq__(self, other): return False
+        return True
+
+    def __ne__(self, other):
+        """
+        Return True if self and other do not hold the same data
+
+        @param other Other object in comparison
+
+        """
+        return not self.__eq__(other)
+    
+
+class multipart_request(ofp_multipart_request):
+    """
+    Wrapper class for multipart_request
+
+    OpenFlow message header: length, version, xid, type
+    @arg length: The total length of the message
+    @arg version: The OpenFlow version (4)
+    @arg xid: The transaction ID
+    @arg type: The message type (OFPT_MULTIPART_REQUEST=18)
+
+    Data members inherited from ofp_multipart_request:
+    @arg type
+    @arg flags
+
+    """
+
+    def __init__(self):
+        ofp_multipart_request.__init__(self)
+        self.header = ofp_header()
+        self.header.type = OFPT_MULTIPART_REQUEST
+
+
+    def pack(self):
+        """
+        Pack object into string
+
+        @return The packed string which can go on the wire
+
+        """
+        self.header.length = len(self)
+        packed = self.header.pack()
+
+        packed += ofp_multipart_request.pack(self)
+        return packed
+
+    def unpack(self, binary_string):
+        """
+        Unpack object from a binary string
+
+        @param binary_string The wire protocol byte string holding the object
+        represented as an array of bytes.
+        @return The remainder of binary_string that was not parsed.
+
+        """
+        binary_string = self.header.unpack(binary_string)
+
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
+        # Fixme: If no self.data, add check for data remaining
+        return binary_string
+
+    def __len__(self):
+        """
+        Return the length of this object once packed into a string
+
+        @return An integer representing the number bytes in the packed
+        string.
+
+        """
+        length = OFP_HEADER_BYTES
+
+        length += ofp_multipart_request.__len__(self)
+        return length
+
+    def show(self, prefix=''):
+        """
+        Generate a string (with multiple lines) describing the contents
+        of the object in a readable manner
+
+        @param prefix Pre-pended at the beginning of each line.
+
+        """
+
+        outstr = prefix + 'multipart_request (OFPT_MULTIPART_REQUEST)\n'
+        prefix += '  '
+        outstr += prefix + 'ofp header\n'
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_multipart_request.show(self, prefix)
+        return outstr
+
+    def __eq__(self, other):
+        """
+        Return True if self and other hold the same data
+
+        @param other Other object in comparison
+
+        """
+        if type(self) != type(other): return False
+        if not self.header.__eq__(other.header): return False
+
+        if not ofp_multipart_request.__eq__(self, other): return False
+        return True
+
+    def __ne__(self, other):
+        """
+        Return True if self and other do not hold the same data
+
+        @param other Other object in comparison
+
+        """
+        return not self.__eq__(other)
+    
+
 class packet_in(ofp_packet_in):
     """
     Wrapper class for packet_in
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_PACKET_IN=10)
 
@@ -1655,6 +1858,7 @@ class packet_in(ofp_packet_in):
     @arg total_len
     @arg reason
     @arg table_id
+    @arg cookie
     @arg match
     @arg data: Binary string following message members
 
@@ -1664,7 +1868,6 @@ class packet_in(ofp_packet_in):
         ofp_packet_in.__init__(self)
         self.header = ofp_header()
         self.header.type = OFPT_PACKET_IN
-        self.match_fields =  match_list()
         self.data = ""
 
 
@@ -1676,20 +1879,9 @@ class packet_in(ofp_packet_in):
 
         """
         self.header.length = len(self)
-        if len(self.match_fields) < 4:
-            tlv_pad = oxm_tlv(0,0,0,0,0)
-            self.match.length += 4
-            self.match_fields.tlvs.append(tlv_pad)
-        else:
-            if len(self.match_fields) > 4:
-                self.match.length +=  len(self.match_fields)
         packed = self.header.pack()
+
         packed += ofp_packet_in.pack(self)
-        packed += self.match_fields.pack()
-        padding_size = roundup( len(self.match) + len(self.match_fields),8) - (len(self.match) + len(self.match_fields))
-        padding = [0] * padding_size
-        if padding_size:
-            packed += struct.pack("!" + str(padding_size) + "B", *padding)
         packed += self.data
         return packed
 
@@ -1703,12 +1895,8 @@ class packet_in(ofp_packet_in):
 
         """
         binary_string = self.header.unpack(binary_string)
+
         binary_string = ofp_packet_in.unpack(self, binary_string)
-        binary_string = self.match_fields.unpack(binary_string, bytes = self.match.length - 4)
-        padding = roundup(OFP_PACKET_IN_BYTES + len(self.match_fields),8) - (OFP_PACKET_IN_BYTES + len(self.match_fields))
-        if padding:
-            binary_string = binary_string[padding:]
-        binary_string = binary_string[2:]
         self.data = binary_string
         binary_string = ''
         return binary_string
@@ -1723,7 +1911,7 @@ class packet_in(ofp_packet_in):
         """
         length = OFP_HEADER_BYTES
 
-        length += roundup(ofp_packet_in.__len__(self) + len(self.match_fields),8)
+        length += ofp_packet_in.__len__(self)
         length += len(self.data)
         return length
 
@@ -1781,7 +1969,7 @@ class packet_out(ofp_packet_out):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_PACKET_OUT=13)
 
@@ -1907,7 +2095,7 @@ class port_mod(ofp_port_mod):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_PORT_MOD=16)
 
@@ -2012,7 +2200,7 @@ class port_status(ofp_port_status):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_PORT_STATUS=12)
 
@@ -2114,7 +2302,7 @@ class queue_get_config_reply(ofp_queue_get_config_reply):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_QUEUE_GET_CONFIG_REPLY=23)
 
@@ -2227,7 +2415,7 @@ class queue_get_config_request(ofp_queue_get_config_request):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_QUEUE_GET_CONFIG_REQUEST=22)
 
@@ -2328,7 +2516,7 @@ class set_config(ofp_switch_config):
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_SET_CONFIG=9)
 
@@ -2424,217 +2612,13 @@ class set_config(ofp_switch_config):
         return not self.__eq__(other)
     
 
-class stats_reply(ofp_stats_reply):
-    """
-    Wrapper class for stats_reply
-
-    OpenFlow message header: length, version, xid, type
-    @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
-    @arg xid: The transaction ID
-    @arg type: The message type (OFPT_STATS_REPLY=19)
-
-    Data members inherited from ofp_stats_reply:
-    @arg type
-    @arg flags
-
-    """
-
-    def __init__(self):
-        ofp_stats_reply.__init__(self)
-        self.header = ofp_header()
-        self.header.type = OFPT_STATS_REPLY
-
-
-    def pack(self):
-        """
-        Pack object into string
-
-        @return The packed string which can go on the wire
-
-        """
-        self.header.length = len(self)
-        packed = self.header.pack()
-
-        packed += ofp_stats_reply.pack(self)
-        return packed
-
-    def unpack(self, binary_string):
-        """
-        Unpack object from a binary string
-
-        @param binary_string The wire protocol byte string holding the object
-        represented as an array of bytes.
-        @return The remainder of binary_string that was not parsed.
-
-        """
-        binary_string = self.header.unpack(binary_string)
-
-        binary_string = ofp_stats_reply.unpack(self, binary_string)
-        # Fixme: If no self.data, add check for data remaining
-        return binary_string
-
-    def __len__(self):
-        """
-        Return the length of this object once packed into a string
-
-        @return An integer representing the number bytes in the packed
-        string.
-
-        """
-        length = OFP_HEADER_BYTES
-
-        length += ofp_stats_reply.__len__(self)
-        return length
-
-    def show(self, prefix=''):
-        """
-        Generate a string (with multiple lines) describing the contents
-        of the object in a readable manner
-
-        @param prefix Pre-pended at the beginning of each line.
-
-        """
-
-        outstr = prefix + 'stats_reply (OFPT_STATS_REPLY)\n'
-        prefix += '  '
-        outstr += prefix + 'ofp header\n'
-        outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_reply.show(self, prefix)
-        return outstr
-
-    def __eq__(self, other):
-        """
-        Return True if self and other hold the same data
-
-        @param other Other object in comparison
-
-        """
-        if type(self) != type(other): return False
-        if not self.header.__eq__(other.header): return False
-
-        if not ofp_stats_reply.__eq__(self, other): return False
-        return True
-
-    def __ne__(self, other):
-        """
-        Return True if self and other do not hold the same data
-
-        @param other Other object in comparison
-
-        """
-        return not self.__eq__(other)
-    
-
-class stats_request(ofp_stats_request):
-    """
-    Wrapper class for stats_request
-
-    OpenFlow message header: length, version, xid, type
-    @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
-    @arg xid: The transaction ID
-    @arg type: The message type (OFPT_STATS_REQUEST=18)
-
-    Data members inherited from ofp_stats_request:
-    @arg type
-    @arg flags
-
-    """
-
-    def __init__(self):
-        ofp_stats_request.__init__(self)
-        self.header = ofp_header()
-        self.header.type = OFPT_STATS_REQUEST
-
-
-    def pack(self):
-        """
-        Pack object into string
-
-        @return The packed string which can go on the wire
-
-        """
-        self.header.length = len(self)
-        packed = self.header.pack()
-
-        packed += ofp_stats_request.pack(self)
-        return packed
-
-    def unpack(self, binary_string):
-        """
-        Unpack object from a binary string
-
-        @param binary_string The wire protocol byte string holding the object
-        represented as an array of bytes.
-        @return The remainder of binary_string that was not parsed.
-
-        """
-        binary_string = self.header.unpack(binary_string)
-
-        binary_string = ofp_stats_request.unpack(self, binary_string)
-        # Fixme: If no self.data, add check for data remaining
-        return binary_string
-
-    def __len__(self):
-        """
-        Return the length of this object once packed into a string
-
-        @return An integer representing the number bytes in the packed
-        string.
-
-        """
-        length = OFP_HEADER_BYTES
-
-        length += ofp_stats_request.__len__(self)
-        return length
-
-    def show(self, prefix=''):
-        """
-        Generate a string (with multiple lines) describing the contents
-        of the object in a readable manner
-
-        @param prefix Pre-pended at the beginning of each line.
-
-        """
-
-        outstr = prefix + 'stats_request (OFPT_STATS_REQUEST)\n'
-        prefix += '  '
-        outstr += prefix + 'ofp header\n'
-        outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_request.show(self, prefix)
-        return outstr
-
-    def __eq__(self, other):
-        """
-        Return True if self and other hold the same data
-
-        @param other Other object in comparison
-
-        """
-        if type(self) != type(other): return False
-        if not self.header.__eq__(other.header): return False
-
-        if not ofp_stats_request.__eq__(self, other): return False
-        return True
-
-    def __ne__(self, other):
-        """
-        Return True if self and other do not hold the same data
-
-        @param other Other object in comparison
-
-        """
-        return not self.__eq__(other)
-    
-
 class table_mod(ofp_table_mod):
     """
     Wrapper class for table_mod
 
     OpenFlow message header: length, version, xid, type
     @arg length: The total length of the message
-    @arg version: The OpenFlow version (3)
+    @arg version: The OpenFlow version (4)
     @arg xid: The transaction ID
     @arg type: The message type (OFPT_TABLE_MOD=17)
 
@@ -2743,7 +2727,7 @@ class table_mod(ofp_table_mod):
 
 class ofp_desc_stats_request(object):
     """
-    Forced definition of ofp_desc_stats_request (empty class)
+    Forced definition of ofp_desc_request (empty class)
     """
     def __init__(self):
         pass
@@ -2754,13 +2738,13 @@ class ofp_desc_stats_request(object):
     def __len__(self):
         return 0
     def show(self, prefix=''):
-        return prefix + "ofp_desc_stats_request (empty)\n"
+        return prefix + "ofp_desc_request (empty)\n"
     def __eq__(self, other):
         return type(self) == type(other)
     def __ne__(self, other):
         return type(self) != type(other)
 
-OFP_DESC_STATS_REQUEST_BYTES = 0
+OFP_DESC_REQUEST_BYTES = 0
 
 class ofp_table_stats_request(object):
     """
@@ -2804,7 +2788,68 @@ class ofp_group_desc_stats_request(object):
 
 OFP_GROUP_DESC_STATS_REQUEST_BYTES = 0
 
+class ofp_group_features_stats_request(object):
+    """
+    Forced definition of ofp_group_features_stats_request (empty class)
+    """
+    def __init__(self):
+        pass
+    def pack(self, assertstruct=True):
+        return ""
+    def unpack(self, binary_string):
+        return binary_string
+    def __len__(self):
+        return 0
+    def show(self, prefix=''):
+        return prefix + "ofp_desc_request (empty)\n"
+    def __eq__(self, other):
+        return type(self) == type(other)
+    def __ne__(self, other):
+        return type(self) != type(other)
 
+OFP_GROUP_FEATURES_STATS_REQUEST_BYTES = 0
+
+class ofp_meter_features_request(object):
+    """
+    Forced definition of ofp_meter_features_request (empty class)
+    """
+    def __init__(self):
+        pass
+    def pack(self, assertstruct=True):
+        return ""
+    def unpack(self, binary_string):
+        return binary_string
+    def __len__(self):
+        return 0
+    def show(self, prefix=''):
+        return prefix + "ofp_meter_features_request (empty)\n"
+    def __eq__(self, other):
+        return type(self) == type(other)
+    def __ne__(self, other):
+        return type(self) != type(other)
+
+OFP_METER_FEATURES_REQUEST_BYTES = 0
+
+class ofp_port_desc_stats_request(object):
+    """
+    Forced definition of ofp_port_desc_stats_request (empty class)
+    """
+    def __init__(self):
+        pass
+    def pack(self, assertstruct=True):
+        return ""
+    def unpack(self, binary_string):
+        return binary_string
+    def __len__(self):
+        return 0
+    def show(self, prefix=''):
+        return prefix + "ofp_port_desc_stats_request (empty)\n"
+    def __eq__(self, other):
+        return type(self) == type(other)
+    def __ne__(self, other):
+        return type(self) != type(other)
+
+OFP_PORT_DESC_STATS_REQUEST_BYTES = 0
 
 # Stats entries define the content of one element in a stats
 # reply for the indicated type; define _entry for consistency
@@ -2812,10 +2857,16 @@ OFP_GROUP_DESC_STATS_REQUEST_BYTES = 0
 aggregate_stats_entry = ofp_aggregate_stats_reply
 desc_stats_entry = ofp_desc_stats
 port_stats_entry = ofp_port_stats
+port_desc_stats_entry = ofp_port
 queue_stats_entry = ofp_queue_stats
 table_stats_entry = ofp_table_stats
+table_features_entry = ofp_table_features
 group_stats_entry = ofp_group_stats
 group_desc_stats_entry = ofp_group_desc_stats
+group_features_entry = ofp_group_features_stats
+meter_multipart_entry = ofp_meter_stats
+meter_config_entry = ofp_meter_config
+meter_features_entry = ofp_meter_features
 
 
 #
@@ -2834,19 +2885,8 @@ class flow_stats_entry(ofp_flow_stats):
 
     def pack(self, assertstruct=True):
         self.length = len(self)
-        if not len(self.match_fields):
-            tlv_pad = oxm_tlv(0,0,0,0,0)
-            self.match.length += 4
-            self.match_fields.tlvs.append(tlv_pad)
-        else:
-            if len(self.match_fields) > 4:
-                self.match.length +=  len(self.match_fields)      
         packed = ofp_flow_stats.pack(self, assertstruct)
         packed += self.match_fields.pack()
-        padding_size = roundup(len(self.match) + len(self.match_fields),8) - (len(self.match) + len(self.match_fields))
-        padding = [0] * padding_size
-        if padding_size:
-            packed += struct.pack("!" + str(padding_size) + "B", *padding)
         packed += self.instructions.pack()
         if len(packed) != self.length:
             print("ERROR: flow_stats_entry pack length not equal",
@@ -2855,11 +2895,7 @@ class flow_stats_entry(ofp_flow_stats):
 
     def unpack(self, binary_string):
         binary_string = ofp_flow_stats.unpack(self, binary_string)
-        binary_string = self.match_fields.unpack(binary_string, bytes = self.match.length - 4)
-        padding = roundup((OFP_FLOW_STATS_BYTES -4) + self.match.length,8) - ((OFP_FLOW_STATS_BYTES - 4) + self.match.length)
-        if padding:
-            binary_string = binary_string[padding:]
-        ai_len = self.length - roundup(OFP_FLOW_STATS_BYTES + len(self.match_fields),8)
+        ai_len = self.length - OFP_FLOW_STATS_BYTES
         if ai_len < 0:
             print("ERROR: flow_stats_entry unpack length too small",
                   self.length)
@@ -2867,12 +2903,12 @@ class flow_stats_entry(ofp_flow_stats):
         return binary_string
 
     def __len__(self):
-        return roundup(OFP_FLOW_STATS_BYTES + len(self.match_fields),8) + len(self.instructions)
+        return OFP_FLOW_STATS_BYTES + len(self.match_fields) + len(self.instructions)
 
     def show(self, prefix=''):
         outstr = prefix + "flow_stats_entry\n"
         outstr += ofp_flow_stats.show(self, prefix + '  ')
-        outstr += self.match_fields.show(prefix + '  ')
+        outstr += self.match_fields.show(self, prefix + '  ')
         outstr += self.instructions.show(prefix + '  ')
         return outstr
 
@@ -2884,99 +2920,76 @@ class flow_stats_entry(ofp_flow_stats):
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class aggregate_stats_request(ofp_stats_request, ofp_aggregate_stats_request):
+class aggregate_stats_request(ofp_multipart_request, ofp_aggregate_stats_request):
     """
     Wrapper class for aggregate stats request message
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_request.__init__(self)
+        ofp_multipart_request.__init__(self)
         ofp_aggregate_stats_request.__init__(self)
-        self.header.type = OFPT_STATS_REQUEST
-        self.type = OFPST_AGGREGATE
-        self.match_fields = match_list()
-        
+        self.header.type = OFPT_MULTIPART_REQUEST
+        self.type = OFPMP_AGGREGATE
+
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_request.pack(self)
-        if not len(self.match_fields):
-            tlv_pad = oxm_tlv(0,0,0,0,0)
-            self.match.length += 4
-            self.match_fields.tlvs.append(tlv_pad)
-        else:
-            if len(self.match_fields) > 4:
-                self.match.length +=  len(self.match_fields)      
-        packed += ofp_aggregate_stats_request.pack(self, assertstruct)
-        packed += self.match_fields.pack()
-        padding_size = roundup(len(self.match) + len(self.match_fields),8) - (len(self.match) + len(self.match_fields))
-        padding = [0] * padding_size
-        
-        if padding_size:
-            packed += struct.pack("!" + str(padding_size) + "B", *padding)
+        packed += ofp_multipart_request.pack(self)
+        packed += ofp_aggregate_stats_request.pack(self)
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_request.unpack(self, binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
         binary_string = ofp_aggregate_stats_request.unpack(self, binary_string)
-        binary_string = self.match_fields.unpack(binary_string, bytes = self.match.length - 4)
-        padding = roundup(OFP_AGGREGATE_STATS_REQUEST_BYTES + len(self.match_fields),8) - (OFP_AGGREGATE_STATS_REQUEST_BYTES + len(self.match_fields))
-        if padding:
-            binary_string = binary_string[padding:]
         if len(binary_string) != 0:
-            print "ERROR unpacking flow: extra data"
+            print "ERROR unpacking aggregate: extra data"
         return binary_string
-    
-    
+
     def __len__(self):
-        length = len(self.header) + OFP_STATS_REQUEST_BYTES + \
-                     OFP_AGGREGATE_STATS_REQUEST_BYTES
-        if not len(self.match_fields):
-            return length + 4            
-        else:
-            return  roundup(length + len(self.match_fields),8) 
+        return len(self.header) + OFP_MULTIPART_REQUEST_BYTES + \
+               OFP_AGGREGATE_STATS_REQUEST_BYTES
 
     def show(self, prefix=''):
         outstr = prefix + "aggregate_stats_request\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_request.show(self)
+        outstr += ofp_multipart_request.show(self)
         outstr += ofp_aggregate_stats_request.show(self)
         return outstr
 
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_request.__eq__(self, other) and
+                ofp_multipart_request.__eq__(self, other) and
                 ofp_aggregate_stats_request.__eq__(self, other))
 
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class aggregate_stats_reply(ofp_stats_reply):
+class aggregate_stats_reply(ofp_multipart_reply):
     """
-    Wrapper class for aggregate stats reply
+    Wrapper class for aggregate multipart reply
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_reply.__init__(self)
-        self.header.type = OFPT_STATS_REPLY
-        self.type = OFPST_AGGREGATE
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
+        self.type = OFPMP_AGGREGATE
         # stats: Array of type aggregate_stats_entry
         self.stats = []
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_reply.pack(self)
+        packed += ofp_multipart_reply.pack(self)
         for obj in self.stats:
             packed += obj.pack()
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_reply.unpack(self, binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
         dummy = aggregate_stats_entry()
         while len(binary_string) >= len(dummy):
             obj = aggregate_stats_entry()
@@ -2987,7 +3000,7 @@ class aggregate_stats_reply(ofp_stats_reply):
         return binary_string
 
     def __len__(self):
-        length = len(self.header) + OFP_STATS_REPLY_BYTES
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
         for obj in self.stats:
             length += len(obj)
         return length
@@ -2996,7 +3009,7 @@ class aggregate_stats_reply(ofp_stats_reply):
         outstr = prefix + "aggregate_stats_reply\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_reply.show(self)
+        outstr += ofp_multipart_reply.show(self)
         outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
         for obj in self.stats:
             outstr += obj.show()
@@ -3005,82 +3018,82 @@ class aggregate_stats_reply(ofp_stats_reply):
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_reply.__eq__(self, other) and
+                ofp_multipart_reply.__eq__(self, other) and
                 self.stats == other.stats)
 
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class desc_stats_request(ofp_stats_request, ofp_desc_stats_request):
+class desc_stats_request(ofp_multipart_request, ofp_desc_stats_request):
     """
     Wrapper class for desc stats request message
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_request.__init__(self)
+        ofp_multipart_request.__init__(self)
         ofp_desc_stats_request.__init__(self)
-        self.header.type = OFPT_STATS_REQUEST
-        self.type = OFPST_DESC
+        self.header.type = OFPT_MULTIPART_REQUEST
+        self.type = OFPMP_DESC
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_request.pack(self)
+        packed += ofp_multipart_request.pack(self)
         packed += ofp_desc_stats_request.pack(self)
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_request.unpack(self, binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
         binary_string = ofp_desc_stats_request.unpack(self, binary_string)
         if len(binary_string) != 0:
             print "ERROR unpacking desc: extra data"
         return binary_string
 
     def __len__(self):
-        return len(self.header) + OFP_STATS_REQUEST_BYTES + \
+        return len(self.header) + OFP_MULTIPART_REQUEST_BYTES + \
                OFP_DESC_STATS_REQUEST_BYTES
 
     def show(self, prefix=''):
         outstr = prefix + "desc_stats_request\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_request.show(self)
+        outstr += ofp_multipart_request.show(self)
         outstr += ofp_desc_stats_request.show(self)
         return outstr
 
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_request.__eq__(self, other) and
+                ofp_multipart_request.__eq__(self, other) and
                 ofp_desc_stats_request.__eq__(self, other))
 
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class desc_stats_reply(ofp_stats_reply):
+class desc_stats_reply(ofp_multipart_reply):
     """
-    Wrapper class for desc stats reply
+    Wrapper class for desc multipart reply
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_reply.__init__(self)
-        self.header.type = OFPT_STATS_REPLY
-        self.type = OFPST_DESC
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
+        self.type = OFPMP_DESC
         # stats: Array of type desc_stats_entry
         self.stats = []
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_reply.pack(self)
+        packed += ofp_multipart_reply.pack(self)
         for obj in self.stats:
             packed += obj.pack()
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_reply.unpack(self, binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
         dummy = desc_stats_entry()
         while len(binary_string) >= len(dummy):
             obj = desc_stats_entry()
@@ -3091,7 +3104,7 @@ class desc_stats_reply(ofp_stats_reply):
         return binary_string
 
     def __len__(self):
-        length = len(self.header) + OFP_STATS_REPLY_BYTES
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
         for obj in self.stats:
             length += len(obj)
         return length
@@ -3100,7 +3113,7 @@ class desc_stats_reply(ofp_stats_reply):
         outstr = prefix + "desc_stats_reply\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_reply.show(self)
+        outstr += ofp_multipart_reply.show(self)
         outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
         for obj in self.stats:
             outstr += obj.show()
@@ -3109,105 +3122,82 @@ class desc_stats_reply(ofp_stats_reply):
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_reply.__eq__(self, other) and
+                ofp_multipart_reply.__eq__(self, other) and
                 self.stats == other.stats)
 
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class flow_stats_request(ofp_stats_request, ofp_flow_stats_request):
+class flow_stats_request(ofp_multipart_request, ofp_flow_stats_request):
     """
     Wrapper class for flow stats request message
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_request.__init__(self)
+        ofp_multipart_request.__init__(self)
         ofp_flow_stats_request.__init__(self)
-        self.header.type = OFPT_STATS_REQUEST
-        self.type = OFPST_FLOW
-        self.match_fields = match_list()
+        self.header.type = OFPT_MULTIPART_REQUEST
+        self.type = OFPMP_FLOW
 
-    def pack(self):
+    def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_request.pack(self)
-        if not len(self.match_fields):
-            tlv_pad = oxm_tlv(0,0,0,0,0)
-            self.match.length += 4
-            self.match_fields.tlvs.append(tlv_pad)
-        else:
-            if len(self.match_fields) > 4:
-                self.match.length +=  len(self.match_fields)       
+        packed += ofp_multipart_request.pack(self)
         packed += ofp_flow_stats_request.pack(self)
-        packed += self.match_fields.pack()
-        padding_size = roundup(len(self.match) + len(self.match_fields),8) - (len(self.match) + len(self.match_fields))
-        padding = [0] * padding_size
-        if padding_size:
-            packed += struct.pack("!" + str(padding_size) + "B", *padding)  
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_request.unpack(self, binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
         binary_string = ofp_flow_stats_request.unpack(self, binary_string)
-        binary_string = self.match_fields.unpack(binary_string, bytes = self.match.length - 4)
-        padding = roundup(OFP_FLOW_STATS_REQUEST_BYTES + len(self.match_fields),8) - (OFP_FLOW_STATS_REQUEST_BYTES + len(self.match_fields))
-        if padding:
-            binary_string = binary_string[padding:]
         if len(binary_string) != 0:
             print "ERROR unpacking flow: extra data"
         return binary_string
 
     def __len__(self):
-            length = len(self.header) + OFP_STATS_REQUEST_BYTES + \
-                     OFP_FLOW_STATS_REQUEST_BYTES
-            if not len(self.match_fields):
-               return length + 4            
-            else:
-               return  roundup(length + len(self.match_fields),8) 
+        return len(self.header) + OFP_MULTIPART_REQUEST_BYTES + \
+               OFP_FLOW_STATS_REQUEST_BYTES
 
     def show(self, prefix=''):
         outstr = prefix + "flow_stats_request\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_request.show(self)
+        outstr += ofp_multipart_request.show(self)
         outstr += ofp_flow_stats_request.show(self)
-        outstr += self.match_fields.show(prefix + '  ')
         return outstr
 
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_request.__eq__(self, other) and
-                ofp_flow_stats_request.__eq__(self, other) and
-                self.match_fields != other.match_fields)
+                ofp_multipart_request.__eq__(self, other) and
+                ofp_flow_stats_request.__eq__(self, other))
 
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class flow_stats_reply(ofp_stats_reply):
+class flow_stats_reply(ofp_multipart_reply):
     """
-    Wrapper class for flow stats reply
+    Wrapper class for flow multipart reply
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_reply.__init__(self)
-        self.header.type = OFPT_STATS_REPLY
-        self.type = OFPST_FLOW
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
+        self.type = OFPMP_FLOW
         # stats: Array of type flow_stats_entry
         self.stats = []
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_reply.pack(self)
+        packed += ofp_multipart_reply.pack(self)
         for obj in self.stats:
             packed += obj.pack()
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_reply.unpack(self, binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
         dummy = flow_stats_entry()
         while len(binary_string) >= len(dummy):
             obj = flow_stats_entry()
@@ -3218,7 +3208,7 @@ class flow_stats_reply(ofp_stats_reply):
         return binary_string
 
     def __len__(self):
-        length = len(self.header) + OFP_STATS_REPLY_BYTES
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
         for obj in self.stats:
             length += len(obj)
         return length
@@ -3227,7 +3217,7 @@ class flow_stats_reply(ofp_stats_reply):
         outstr = prefix + "flow_stats_reply\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_reply.show(self)
+        outstr += ofp_multipart_reply.show(self)
         outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
         for obj in self.stats:
             outstr += obj.show()
@@ -3236,82 +3226,82 @@ class flow_stats_reply(ofp_stats_reply):
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_reply.__eq__(self, other) and
+                ofp_multipart_reply.__eq__(self, other) and
                 self.stats == other.stats)
 
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class port_stats_request(ofp_stats_request, ofp_port_stats_request):
+class port_stats_request(ofp_multipart_request, ofp_port_stats_request):
     """
     Wrapper class for port stats request message
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_request.__init__(self)
+        ofp_multipart_request.__init__(self)
         ofp_port_stats_request.__init__(self)
-        self.header.type = OFPT_STATS_REQUEST
-        self.type = OFPST_PORT
+        self.header.type = OFPT_MULTIPART_REQUEST
+        self.type = OFPMP_PORT_STATS
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_request.pack(self)
+        packed += ofp_multipart_request.pack(self)
         packed += ofp_port_stats_request.pack(self)
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_request.unpack(self, binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
         binary_string = ofp_port_stats_request.unpack(self, binary_string)
         if len(binary_string) != 0:
             print "ERROR unpacking port: extra data"
         return binary_string
 
     def __len__(self):
-        return len(self.header) + OFP_STATS_REQUEST_BYTES + \
+        return len(self.header) + OFP_MULTIPART_REQUEST_BYTES + \
                OFP_PORT_STATS_REQUEST_BYTES
 
     def show(self, prefix=''):
         outstr = prefix + "port_stats_request\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_request.show(self)
+        outstr += ofp_multipart_request.show(self)
         outstr += ofp_port_stats_request.show(self)
         return outstr
 
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_request.__eq__(self, other) and
+                ofp_multipart_request.__eq__(self, other) and
                 ofp_port_stats_request.__eq__(self, other))
 
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class port_stats_reply(ofp_stats_reply):
+class port_stats_reply(ofp_multipart_reply):
     """
-    Wrapper class for port stats reply
+    Wrapper class for port multipart reply
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_reply.__init__(self)
-        self.header.type = OFPT_STATS_REPLY
-        self.type = OFPST_PORT
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
+        self.type = OFPMP_PORT_STATS
         # stats: Array of type port_stats_entry
         self.stats = []
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_reply.pack(self)
+        packed += ofp_multipart_reply.pack(self)
         for obj in self.stats:
             packed += obj.pack()
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_reply.unpack(self, binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
         dummy = port_stats_entry()
         while len(binary_string) >= len(dummy):
             obj = port_stats_entry()
@@ -3322,7 +3312,7 @@ class port_stats_reply(ofp_stats_reply):
         return binary_string
 
     def __len__(self):
-        length = len(self.header) + OFP_STATS_REPLY_BYTES
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
         for obj in self.stats:
             length += len(obj)
         return length
@@ -3331,7 +3321,7 @@ class port_stats_reply(ofp_stats_reply):
         outstr = prefix + "port_stats_reply\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_reply.show(self)
+        outstr += ofp_multipart_reply.show(self)
         outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
         for obj in self.stats:
             outstr += obj.show()
@@ -3340,82 +3330,186 @@ class port_stats_reply(ofp_stats_reply):
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_reply.__eq__(self, other) and
+                ofp_multipart_reply.__eq__(self, other) and
                 self.stats == other.stats)
 
     def __ne__(self, other): return not self.__eq__(other)
 
-
-class queue_stats_request(ofp_stats_request, ofp_queue_stats_request):
+class port_desc_stats_request(ofp_multipart_request, ofp_port_desc_stats_request):
     """
-    Wrapper class for queue stats request message
+    Wrapper class for port stats request message
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_request.__init__(self)
-        ofp_queue_stats_request.__init__(self)
-        self.header.type = OFPT_STATS_REQUEST
-        self.type = OFPST_QUEUE
+        ofp_multipart_request.__init__(self)
+        ofp_port_stats_request.__init__(self)
+        self.header.type = OFPT_MULTIPART_REQUEST
+        self.type = OFPMP_PORT_DESC
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_request.pack(self)
-        packed += ofp_queue_stats_request.pack(self)
+        packed += ofp_multipart_request.pack(self)
+        packed += ofp_port_desc_stats_request.pack(self)
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_request.unpack(self, binary_string)
-        binary_string = ofp_queue_stats_request.unpack(self, binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
+        binary_string = ofp_port_desc_stats_request.unpack(self, binary_string)
         if len(binary_string) != 0:
-            print "ERROR unpacking queue: extra data"
+            print "ERROR unpacking port: extra data"
         return binary_string
 
     def __len__(self):
-        return len(self.header) + OFP_STATS_REQUEST_BYTES + \
-               OFP_QUEUE_STATS_REQUEST_BYTES
+        return len(self.header) + OFP_MULTIPART_REQUEST_BYTES + \
+               OFP_PORT_DESC_STATS_REQUEST_BYTES
 
     def show(self, prefix=''):
-        outstr = prefix + "queue_stats_request\n"
+        outstr = prefix + "port_desc_stats_request\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_request.show(self)
-        outstr += ofp_queue_stats_request.show(self)
+        outstr += ofp_multipart_request.show(self)
+        outstr += ofp_port_desc_stats_request.show(self)
         return outstr
 
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_request.__eq__(self, other) and
-                ofp_queue_stats_request.__eq__(self, other))
+                ofp_multipart_request.__eq__(self, other) and
+                ofp_port_desc_stats_request.__eq__(self, other))
 
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class queue_stats_reply(ofp_stats_reply):
+class port_desc_stats_reply(ofp_multipart_reply):
     """
-    Wrapper class for queue stats reply
+    Wrapper class for port desc multipart reply
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_reply.__init__(self)
-        self.header.type = OFPT_STATS_REPLY
-        self.type = OFPST_QUEUE
-        # stats: Array of type queue_stats_entry
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
+        self.type = OFPMP_PORT_DESC
+        # stats: Array of type port_desc_stats_entry
         self.stats = []
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_reply.pack(self)
+        packed += ofp_multipart_reply.pack(self)
         for obj in self.stats:
             packed += obj.pack()
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_reply.unpack(self, binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
+        dummy = port_desc_stats_entry()
+        while len(binary_string) >= len(dummy):
+            obj = port_desc_stats_entry()
+            binary_string = obj.unpack(binary_string)
+            self.stats.append(obj)
+        if len(binary_string) != 0:
+            print "ERROR unpacking port stats string: extra bytes"
+        return binary_string
+
+    def __len__(self):
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
+        for obj in self.stats:
+            length += len(obj)
+        return length
+
+    def show(self, prefix=''):
+        outstr = prefix + "port_desc_stats_reply\n"
+        outstr += prefix + "ofp header:\n"
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_multipart_reply.show(self)
+        outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
+        for obj in self.stats:
+            outstr += obj.show()
+        return outstr
+
+    def __eq__(self, other):
+        if type(self) != type(other): return False
+        return (self.header == other.header and
+                ofp_multipart_reply.__eq__(self, other) and
+                self.stats == other.stats)
+
+    def __ne__(self, other): return not self.__eq__(other)
+
+
+
+class queue_stats_request(ofp_multipart_request, ofp_queue_stats_request):
+    """
+    Wrapper class for queue stats request message
+    """
+    def __init__(self):
+        self.header = ofp_header()
+        ofp_multipart_request.__init__(self)
+        ofp_queue_stats_request.__init__(self)
+        self.header.type = OFPT_MULTIPART_REQUEST
+        self.type = OFPMP_QUEUE
+
+    def pack(self, assertstruct=True):
+        self.header.length = len(self)
+        packed = self.header.pack()
+        packed += ofp_multipart_request.pack(self)
+        packed += ofp_queue_stats_request.pack(self)
+        return packed
+
+    def unpack(self, binary_string):
+        binary_string = self.header.unpack(binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
+        binary_string = ofp_queue_stats_request.unpack(self, binary_string)
+        if len(binary_string) != 0:
+            print "ERROR unpacking queue: extra data"
+        return binary_string
+
+    def __len__(self):
+        return len(self.header) + OFP_MULTIPART_REQUEST_BYTES + \
+               OFP_QUEUE_STATS_REQUEST_BYTES
+
+    def show(self, prefix=''):
+        outstr = prefix + "queue_stats_request\n"
+        outstr += prefix + "ofp header:\n"
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_multipart_request.show(self)
+        outstr += ofp_queue_stats_request.show(self)
+        return outstr
+
+    def __eq__(self, other):
+        if type(self) != type(other): return False
+        return (self.header == other.header and
+                ofp_multipart_request.__eq__(self, other) and
+                ofp_queue_stats_request.__eq__(self, other))
+
+    def __ne__(self, other): return not self.__eq__(other)
+
+
+class queue_stats_reply(ofp_multipart_reply):
+    """
+    Wrapper class for queue multipart reply
+    """
+    def __init__(self):
+        self.header = ofp_header()
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
+        self.type = OFPMP_QUEUE
+        # stats: Array of type queue_stats_entry
+        self.stats = []
+
+    def pack(self, assertstruct=True):
+        self.header.length = len(self)
+        packed = self.header.pack()
+        packed += ofp_multipart_reply.pack(self)
+        for obj in self.stats:
+            packed += obj.pack()
+        return packed
+
+    def unpack(self, binary_string):
+        binary_string = self.header.unpack(binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
         dummy = queue_stats_entry()
         while len(binary_string) >= len(dummy):
             obj = queue_stats_entry()
@@ -3426,7 +3520,7 @@ class queue_stats_reply(ofp_stats_reply):
         return binary_string
 
     def __len__(self):
-        length = len(self.header) + OFP_STATS_REPLY_BYTES
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
         for obj in self.stats:
             length += len(obj)
         return length
@@ -3435,7 +3529,7 @@ class queue_stats_reply(ofp_stats_reply):
         outstr = prefix + "queue_stats_reply\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_reply.show(self)
+        outstr += ofp_multipart_reply.show(self)
         outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
         for obj in self.stats:
             outstr += obj.show()
@@ -3444,82 +3538,82 @@ class queue_stats_reply(ofp_stats_reply):
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_reply.__eq__(self, other) and
+                ofp_multipart_reply.__eq__(self, other) and
                 self.stats == other.stats)
 
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class group_stats_request(ofp_stats_request, ofp_group_stats_request):
+class group_stats_request(ofp_multipart_request, ofp_group_stats_request):
     """
     Wrapper class for group stats request message
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_request.__init__(self)
+        ofp_multipart_request.__init__(self)
         ofp_group_stats_request.__init__(self)
-        self.header.type = OFPT_STATS_REQUEST
-        self.type = OFPST_GROUP
+        self.header.type = OFPT_MULTIPART_REQUEST
+        self.type = OFPMP_GROUP
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_request.pack(self)
+        packed += ofp_multipart_request.pack(self)
         packed += ofp_group_stats_request.pack(self)
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_request.unpack(self, binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
         binary_string = ofp_group_stats_request.unpack(self, binary_string)
         if len(binary_string) != 0:
             print "ERROR unpacking group: extra data"
         return binary_string
 
     def __len__(self):
-        return len(self.header) + OFP_STATS_REQUEST_BYTES + \
+        return len(self.header) + OFP_MULTIPART_REQUEST_BYTES + \
                OFP_GROUP_STATS_REQUEST_BYTES
 
     def show(self, prefix=''):
         outstr = prefix + "group_stats_request\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_request.show(self)
+        outstr += ofp_multipart_request.show(self)
         outstr += ofp_group_stats_request.show(self)
         return outstr
 
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_request.__eq__(self, other) and
+                ofp_multipart_request.__eq__(self, other) and
                 ofp_group_stats_request.__eq__(self, other))
 
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class group_stats_reply(ofp_stats_reply):
+class group_stats_reply(ofp_multipart_reply):
     """
-    Wrapper class for group stats reply
+    Wrapper class for group multipart reply
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_reply.__init__(self)
-        self.header.type = OFPT_STATS_REPLY
-        self.type = OFPST_GROUP
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
+        self.type = OFPMP_GROUP
         # stats: Array of type group_stats_entry
         self.stats = []
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_reply.pack(self)
+        packed += ofp_multipart_reply.pack(self)
         for obj in self.stats:
             packed += obj.pack()
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_reply.unpack(self, binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
         dummy = group_stats_entry()
         while len(binary_string) >= len(dummy):
             obj = group_stats_entry()
@@ -3530,7 +3624,7 @@ class group_stats_reply(ofp_stats_reply):
         return binary_string
 
     def __len__(self):
-        length = len(self.header) + OFP_STATS_REPLY_BYTES
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
         for obj in self.stats:
             length += len(obj)
         return length
@@ -3539,7 +3633,7 @@ class group_stats_reply(ofp_stats_reply):
         outstr = prefix + "group_stats_reply\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_reply.show(self)
+        outstr += ofp_multipart_reply.show(self)
         outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
         for obj in self.stats:
             outstr += obj.show()
@@ -3548,82 +3642,82 @@ class group_stats_reply(ofp_stats_reply):
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_reply.__eq__(self, other) and
+                ofp_multipart_reply.__eq__(self, other) and
                 self.stats == other.stats)
 
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class group_desc_stats_request(ofp_stats_request, ofp_group_desc_stats_request):
+class group_desc_stats_request(ofp_multipart_request, ofp_group_desc_stats_request):
     """
     Wrapper class for group_desc stats request message
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_request.__init__(self)
+        ofp_multipart_request.__init__(self)
         ofp_group_desc_stats_request.__init__(self)
-        self.header.type = OFPT_STATS_REQUEST
-        self.type = OFPST_GROUP_DESC
+        self.header.type = OFPT_MULTIPART_REQUEST
+        self.type = OFPMP_GROUP_DESC
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_request.pack(self)
+        packed += ofp_multipart_request.pack(self)
         packed += ofp_group_desc_stats_request.pack(self)
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_request.unpack(self, binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
         binary_string = ofp_group_desc_stats_request.unpack(self, binary_string)
         if len(binary_string) != 0:
             print "ERROR unpacking group_desc: extra data"
         return binary_string
 
     def __len__(self):
-        return len(self.header) + OFP_STATS_REQUEST_BYTES + \
+        return len(self.header) + OFP_MULTIPART_REQUEST_BYTES + \
                OFP_GROUP_DESC_STATS_REQUEST_BYTES
 
     def show(self, prefix=''):
         outstr = prefix + "group_desc_stats_request\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_request.show(self)
+        outstr += ofp_multipart_request.show(self)
         outstr += ofp_group_desc_stats_request.show(self)
         return outstr
 
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_request.__eq__(self, other) and
+                ofp_multipart_request.__eq__(self, other) and
                 ofp_group_desc_stats_request.__eq__(self, other))
 
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class group_desc_stats_reply(ofp_stats_reply):
+class group_desc_stats_reply(ofp_multipart_reply):
     """
-    Wrapper class for group_desc stats reply
+    Wrapper class for group_desc multipart reply
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_reply.__init__(self)
-        self.header.type = OFPT_STATS_REPLY
-        self.type = OFPST_GROUP_DESC
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
+        self.type = OFPMP_GROUP_DESC
         # stats: Array of type group_desc_stats_entry
         self.stats = []
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_reply.pack(self)
+        packed += ofp_multipart_reply.pack(self)
         for obj in self.stats:
             packed += obj.pack()
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_reply.unpack(self, binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
         dummy = group_desc_stats_entry()
         while len(binary_string) >= len(dummy):
             obj = group_desc_stats_entry()
@@ -3634,7 +3728,7 @@ class group_desc_stats_reply(ofp_stats_reply):
         return binary_string
 
     def __len__(self):
-        length = len(self.header) + OFP_STATS_REPLY_BYTES
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
         for obj in self.stats:
             length += len(obj)
         return length
@@ -3643,7 +3737,7 @@ class group_desc_stats_reply(ofp_stats_reply):
         outstr = prefix + "group_desc_stats_reply\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_reply.show(self)
+        outstr += ofp_multipart_reply.show(self)
         outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
         for obj in self.stats:
             outstr += obj.show()
@@ -3652,82 +3746,82 @@ class group_desc_stats_reply(ofp_stats_reply):
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_reply.__eq__(self, other) and
+                ofp_multipart_reply.__eq__(self, other) and
                 self.stats == other.stats)
 
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class table_stats_request(ofp_stats_request, ofp_table_stats_request):
+class table_stats_request(ofp_multipart_request, ofp_table_stats_request):
     """
     Wrapper class for table stats request message
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_request.__init__(self)
+        ofp_multipart_request.__init__(self)
         ofp_table_stats_request.__init__(self)
-        self.header.type = OFPT_STATS_REQUEST
-        self.type = OFPST_TABLE
+        self.header.type = OFPT_MULTIPART_REQUEST
+        self.type = OFPMP_TABLE
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_request.pack(self)
+        packed += ofp_multipart_request.pack(self)
         packed += ofp_table_stats_request.pack(self)
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_request.unpack(self, binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
         binary_string = ofp_table_stats_request.unpack(self, binary_string)
         if len(binary_string) != 0:
             print "ERROR unpacking table: extra data"
         return binary_string
 
     def __len__(self):
-        return len(self.header) + OFP_STATS_REQUEST_BYTES + \
+        return len(self.header) + OFP_MULTIPART_REQUEST_BYTES + \
                OFP_TABLE_STATS_REQUEST_BYTES
 
     def show(self, prefix=''):
         outstr = prefix + "table_stats_request\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_request.show(self)
+        outstr += ofp_multipart_request.show(self)
         outstr += ofp_table_stats_request.show(self)
         return outstr
 
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_request.__eq__(self, other) and
+                ofp_multipart_request.__eq__(self, other) and
                 ofp_table_stats_request.__eq__(self, other))
 
     def __ne__(self, other): return not self.__eq__(other)
 
 
-class table_stats_reply(ofp_stats_reply):
+class table_stats_reply(ofp_multipart_reply):
     """
-    Wrapper class for table stats reply
+    Wrapper class for table multipart reply
     """
     def __init__(self):
         self.header = ofp_header()
-        ofp_stats_reply.__init__(self)
-        self.header.type = OFPT_STATS_REPLY
-        self.type = OFPST_TABLE
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
+        self.type = OFPMP_TABLE
         # stats: Array of type table_stats_entry
         self.stats = []
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
-        packed += ofp_stats_reply.pack(self)
+        packed += ofp_multipart_reply.pack(self)
         for obj in self.stats:
             packed += obj.pack()
         return packed
 
     def unpack(self, binary_string):
         binary_string = self.header.unpack(binary_string)
-        binary_string = ofp_stats_reply.unpack(self, binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
         dummy = table_stats_entry()
         while len(binary_string) >= len(dummy):
             obj = table_stats_entry()
@@ -3738,7 +3832,7 @@ class table_stats_reply(ofp_stats_reply):
         return binary_string
 
     def __len__(self):
-        length = len(self.header) + OFP_STATS_REPLY_BYTES
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
         for obj in self.stats:
             length += len(obj)
         return length
@@ -3747,7 +3841,7 @@ class table_stats_reply(ofp_stats_reply):
         outstr = prefix + "table_stats_reply\n"
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
-        outstr += ofp_stats_reply.show(self)
+        outstr += ofp_multipart_reply.show(self)
         outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
         for obj in self.stats:
             outstr += obj.show()
@@ -3756,10 +3850,529 @@ class table_stats_reply(ofp_stats_reply):
     def __eq__(self, other):
         if type(self) != type(other): return False
         return (self.header == other.header and
-                ofp_stats_reply.__eq__(self, other) and
+                ofp_multipart_reply.__eq__(self, other) and
                 self.stats == other.stats)
 
     def __ne__(self, other): return not self.__eq__(other)
+
+class group_features_stats_request(ofp_multipart_request):
+    """
+    Wrapper class for group features multipart request
+    """
+    def __init__(self):
+        self.header = ofp_header()
+        ofp_multipart_request.__init__(self)
+        self.header.type = OFPT_MULTIPART_REQUEST
+        self.type = OFPMP_GROUP_FEATURES
+        # stats: Array of type group_features_entry
+        self.stats = []
+
+    def pack(self, assertstruct=True):
+        self.header.length = len(self)
+        packed = self.header.pack()
+        packed += ofp_multipart_request.pack(self)
+        for obj in self.stats:
+            packed += obj.pack()
+        return packed
+
+    def unpack(self, binary_string):
+        binary_string = self.header.unpack(binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
+        dummy = group_features_entry()
+        while len(binary_string) >= len(dummy):
+            obj = group_features_entry()
+            binary_string = obj.unpack(binary_string)
+            self.stats.append(obj)
+        if len(binary_string) != 0:
+            print "ERROR unpacking group features string: extra bytes"
+        return binary_string
+
+    def __len__(self):
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
+        for obj in self.stats:
+            length += len(obj)
+        return length
+
+    def show(self, prefix=''):
+        outstr = prefix + "group_features_request\n"
+        outstr += prefix + "ofp header:\n"
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_multipart_request.show(self)
+        outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
+        for obj in self.stats:
+            outstr += obj.show()
+        return outstr
+
+    def __eq__(self, other):
+        if type(self) != type(other): return False
+        return (self.header == other.header and
+                ofp_multipart_request.__eq__(self, other) and
+                self.stats == other.stats)
+
+    def __ne__(self, other): return not self.__eq__(other)
+
+class group_features_stats_reply(ofp_multipart_reply):
+    """
+    Wrapper class for group features multipart reply
+    """
+    def __init__(self):
+        self.header = ofp_header()
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
+        self.type = OFPMP_GROUP_FEATURES
+        # stats: Array of type group_features_entry
+        self.stats = []
+
+    def pack(self, assertstruct=True):
+        self.header.length = len(self)
+        packed = self.header.pack()
+        packed += ofp_multipart_reply.pack(self)
+        for obj in self.stats:
+            packed += obj.pack()
+        return packed
+
+    def unpack(self, binary_string):
+        binary_string = self.header.unpack(binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
+        dummy = group_features_entry()
+        while len(binary_string) >= len(dummy):
+            obj = group_features_entry()
+            binary_string = obj.unpack(binary_string)
+            self.stats.append(obj)
+        if len(binary_string) != 0:
+            print "ERROR unpacking desc stats string: extra bytes"
+        return binary_string
+
+    def __len__(self):
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
+        for obj in self.stats:
+            length += len(obj)
+        return length
+
+    def show(self, prefix=''):
+        outstr = prefix + "desc_stats_reply\n"
+        outstr += prefix + "ofp header:\n"
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_multipart_reply.show(self)
+        outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
+        for obj in self.stats:
+            outstr += obj.show()
+        return outstr
+
+    def __eq__(self, other):
+        if type(self) != type(other): return False
+        return (self.header == other.header and
+                ofp_multipart_reply.__eq__(self, other) and
+                self.stats == other.stats)
+
+    def __ne__(self, other): return not self.__eq__(other)
+
+class meter_multipart_request(ofp_multipart_request, ofp_meter_multipart_request):
+    """
+    Wrapper class for meter multipart request message
+    """
+    def __init__(self):
+        self.header = ofp_header()
+        ofp_multipart_request.__init__(self)
+        ofp_meter_multipart_request.__init__(self)
+        self.header.type = OFPT_MULTIPART_REQUEST
+        self.type = OFPMP_METER
+
+    def pack(self, assertstruct=True):
+        self.header.length = len(self)
+        packed = self.header.pack()
+        packed += ofp_multipart_request.pack(self)
+        packed += ofp_meter_multipart_request.pack(self)
+        return packed
+
+    def unpack(self, binary_string):
+        binary_string = self.header.unpack(binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
+        binary_string = ofp_meter_multipart_request.unpack(self, binary_string)
+        if len(binary_string) != 0:
+            print "ERROR unpacking meter stats: extra data"
+        return binary_string
+
+    def __len__(self):
+        return len(self.header) + OFP_MULTIPART_REQUEST_BYTES + \
+               OFP_METER_MULTIPART_REQUEST_BYTES
+
+    def show(self, prefix=''):
+        outstr = prefix + "meter_multipart_request\n"
+        outstr += prefix + "ofp header:\n"
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_multipart_request.show(self)
+        outstr += ofp_meter_multipart_request.show(self)
+        return outstr
+
+    def __eq__(self, other):
+        if type(self) != type(other): return False
+        return (self.header == other.header and
+                ofp_multipart_request.__eq__(self, other) and
+                ofp_meter_multipart_request.__eq__(self, other))
+
+    def __ne__(self, other): return not self.__eq__(other)
+
+
+class meter_multipart_reply(ofp_multipart_reply):
+    """
+    Wrapper class for meter multipart reply
+    """
+    def __init__(self):
+        self.header = ofp_header()
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
+        self.type = OFPMP_METER
+        # stats: Array of type meter_multipart_entry
+        self.stats = []
+
+    def pack(self, assertstruct=True):
+        self.header.length = len(self)
+        packed = self.header.pack()
+        packed += ofp_multipart_reply.pack(self)
+        for obj in self.stats:
+            packed += obj.pack()
+        return packed
+
+    def unpack(self, binary_string):
+        binary_string = self.header.unpack(binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
+        dummy = meter_multipart_entry()
+        while len(binary_string) >= len(dummy):
+            obj = meter_multipart_entry()
+            binary_string = obj.unpack(binary_string)
+            self.stats.append(obj)
+        if len(binary_string) != 0:
+            print "ERROR unpacking meter multipart string: extra bytes"
+        return binary_string
+
+    def __len__(self):
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
+        for obj in self.stats:
+            length += len(obj)
+        return length
+
+    def show(self, prefix=''):
+        outstr = prefix + "meter_multipart_reply\n"
+        outstr += prefix + "ofp header:\n"
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_multipart_reply.show(self)
+        outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
+        for obj in self.stats:
+            outstr += obj.show()
+        return outstr
+
+    def __eq__(self, other):
+        if type(self) != type(other): return False
+        return (self.header == other.header and
+                ofp_multipart_reply.__eq__(self, other) and
+                self.stats == other.stats)
+
+    def __ne__(self, other): return not self.__eq__(other)
+
+class meter_config_stats_request(ofp_multipart_request, ofp_meter_multipart_request):
+    """
+    Wrapper class for meter config multipart request message
+    """
+    def __init__(self):
+        self.header = ofp_header()
+        ofp_multipart_request.__init__(self)
+        ofp_meter_multipart_request.__init__(self)
+        self.header.type = OFPT_MULTIPART_REQUEST
+        self.type = OFPMP_METER_CONFIG
+
+    def pack(self, assertstruct=True):
+        self.header.length = len(self)
+        packed = self.header.pack()
+        packed += ofp_multipart_request.pack(self)
+        packed += ofp_meter_multipart_request.pack(self)
+        return packed
+
+    def unpack(self, binary_string):
+        binary_string = self.header.unpack(binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
+        binary_string = ofp_meter_multipart_request.unpack(self, binary_string)
+        if len(binary_string) != 0:
+            print "ERROR unpacking meter stats: extra data"
+        return binary_string
+
+    def __len__(self):
+        return len(self.header) + OFP_MULTIPART_REQUEST_BYTES + \
+               OFP_METER_MULTIPART_REQUEST_BYTES
+
+    def show(self, prefix=''):
+        outstr = prefix + "meter_multipart_request\n"
+        outstr += prefix + "ofp header:\n"
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_multipart_request.show(self)
+        outstr += ofp_meter_multipart_request.show(self)
+        return outstr
+
+    def __eq__(self, other):
+        if type(self) != type(other): return False
+        return (self.header == other.header and
+                ofp_multipart_request.__eq__(self, other) and
+                ofp_meter_multipart_request.__eq__(self, other))
+
+    def __ne__(self, other): return not self.__eq__(other)
+
+
+class meter_config_stats_reply(ofp_multipart_reply):
+    """
+    Wrapper class for meter multipart reply
+    """
+    def __init__(self):
+        self.header = ofp_header()
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
+        self.type = OFPMP_METER_CONFIG
+        # stats: Array of type meter_config_entry
+        self.stats = []
+
+    def pack(self, assertstruct=True):
+        self.header.length = len(self)
+        packed = self.header.pack()
+        packed += ofp_multipart_reply.pack(self)
+        for obj in self.stats:
+            packed += obj.pack()
+        return packed
+
+    def unpack(self, binary_string):
+        binary_string = self.header.unpack(binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
+        dummy = meter_config_stats_entry()
+        while len(binary_string) >= len(dummy):
+            obj = meter_config_stats_entry()
+            binary_string = obj.unpack(binary_string)
+            self.stats.append(obj)
+        if len(binary_string) != 0:
+            print "ERROR unpacking meter config stats string: extra bytes"
+        return binary_string
+
+    def __len__(self):
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
+        for obj in self.stats:
+            length += len(obj)
+        return length
+
+    def show(self, prefix=''):
+        outstr = prefix + "meter_config_stats_reply\n"
+        outstr += prefix + "ofp header:\n"
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_multipart_reply.show(self)
+        outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
+        for obj in self.stats:
+            outstr += obj.show()
+        return outstr
+
+    def __eq__(self, other):
+        if type(self) != type(other): return False
+        return (self.header == other.header and
+                ofp_multipart_reply.__eq__(self, other) and
+                self.stats == other.stats)
+
+    def __ne__(self, other): return not self.__eq__(other)
+
+class meter_features_stats_request(ofp_multipart_request,ofp_meter_features_request):
+    """
+    Wrapper class for meter features request message
+    """
+    def __init__(self):
+        self.header = ofp_header()
+        ofp_multipart_request.__init__(self)
+        ofp_meter_features_request.__init__(self)
+        self.header.type = OFPT_MULTIPART_REQUEST
+        self.type = OFPMP_METER_FEATURES
+
+    def pack(self, assertstruct=True):
+        self.header.length = len(self)
+        packed = self.header.pack()
+        packed += ofp_multipart_request.pack(self)
+        return packed
+
+    def unpack(self, binary_string):
+        binary_string = self.header.unpack(binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
+        if len(binary_string) != 0:
+            print "ERROR unpacking meter stats: extra data"
+        return binary_string
+
+    def __len__(self):
+        return len(self.header) + OFP_MULTIPART_REQUEST_BYTES + \
+               OFP_METER_FEATURES_REQUEST_BYTES
+
+    def show(self, prefix=''):
+        outstr = prefix + "meter_multipart_request\n"
+        outstr += prefix + "ofp header:\n"
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_multipart_request.show(self)
+        return outstr
+
+    def __eq__(self, other):
+        if type(self) != type(other): return False
+        return (self.header == other.header and
+                ofp_multipart_request.__eq__(self, other) and
+                ofp_meter_features_request.__eq__(self, other))
+
+    def __ne__(self, other): return not self.__eq__(other)
+
+
+class meter_features_stats_reply(ofp_multipart_reply):
+    """
+    Wrapper class for meter multipart reply
+    """
+    def __init__(self):
+        self.header = ofp_header()
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
+        self.type = OFPMP_METER_FEATURES
+        # stats: Array of type meter_features_entry
+        self.stats = []
+
+    def pack(self, assertstruct=True):
+        self.header.length = len(self)
+        packed = self.header.pack()
+        packed += ofp_multipart_reply.pack(self)
+        for obj in self.stats:
+            packed += obj.pack()
+        return packed
+
+    def unpack(self, binary_string):
+        binary_string = self.header.unpack(binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
+        dummy = meter_features_entry()
+        while len(binary_string) >= len(dummy):
+            obj = meter_multipart_entry()
+            binary_string = obj.unpack(binary_string)
+            self.stats.append(obj)
+        if len(binary_string) != 0:
+            print "ERROR unpacking meter features string: extra bytes"
+        return binary_string
+
+    def __len__(self):
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
+        for obj in self.stats:
+            length += len(obj)
+        return length
+
+    def show(self, prefix=''):
+        outstr = prefix + "meter_features_reply\n"
+        outstr += prefix + "ofp header:\n"
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_multipart_reply.show(self)
+        outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
+        for obj in self.stats:
+            outstr += obj.show()
+        return outstr
+
+    def __eq__(self, other):
+        if type(self) != type(other): return False
+        return (self.header == other.header and
+                ofp_multipart_reply.__eq__(self, other) and
+                self.stats == other.stats)
+
+    def __ne__(self, other): return not self.__eq__(other)
+
+class table_features_stats_request(ofp_multipart_request,ofp_table_features):
+    """
+    Wrapper class for table features request message
+    """
+    def __init__(self):
+        self.header = ofp_header()
+        ofp_multipart_request.__init__(self)
+        ofp_table_features.__init__(self)
+        self.header.type = OFPT_MULTIPART_REQUEST
+        self.type = OFPMP_TABLE_FEATURES
+
+    def pack(self, assertstruct=True):
+        self.header.length = len(self)
+        packed = self.header.pack()
+        packed += ofp_multipart_request.pack(self)
+        return packed
+
+    def unpack(self, binary_string):
+        binary_string = self.header.unpack(binary_string)
+        binary_string = ofp_multipart_request.unpack(self, binary_string)
+        if len(binary_string) != 0:
+            print "ERROR unpacking table featuring stats: extra data"
+        return binary_string
+
+    def __len__(self):
+        return len(self.header) + OFP_MULTIPART_REQUEST_BYTES + \
+               OFP_TABLE_FEATURES_BYTES
+
+    def show(self, prefix=''):
+        outstr = prefix + "table_multipart_request\n"
+        outstr += prefix + "ofp header:\n"
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_multipart_request.show(self)
+        return outstr
+
+    def __eq__(self, other):
+        if type(self) != type(other): return False
+        return (self.header == other.header and
+                ofp_multipart_request.__eq__(self, other) and
+                ofp_table_features.__eq__(self, other))
+
+    def __ne__(self, other): return not self.__eq__(other)
+
+
+class table_features_stats_reply(ofp_multipart_reply):
+    """
+    Wrapper class for table multipart reply
+    """
+    def __init__(self):
+        self.header = ofp_header()
+        ofp_multipart_reply.__init__(self)
+        self.header.type = OFPT_MULTIPART_REPLY
+        self.type = OFPMP_TABLE_FEATURES
+        # stats: Array of type table_features_entry
+        self.stats = []
+
+    def pack(self, assertstruct=True):
+        self.header.length = len(self)
+        packed = self.header.pack()
+        packed += ofp_multipart_reply.pack(self)
+        for obj in self.stats:
+            packed += obj.pack()
+        return packed
+
+    def unpack(self, binary_string):
+        binary_string = self.header.unpack(binary_string)
+        binary_string = ofp_multipart_reply.unpack(self, binary_string)
+        dummy = table_features_entry()
+        while len(binary_string) >= len(dummy):
+            obj = table_multipart_entry()
+            binary_string = obj.unpack(binary_string)
+            self.stats.append(obj)
+        if len(binary_string) != 0:
+            print "ERROR unpacking table features string: extra bytes"
+        return binary_string
+
+    def __len__(self):
+        length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
+        for obj in self.stats:
+            length += len(obj)
+        return length
+
+    def show(self, prefix=''):
+        outstr = prefix + "table_features_reply\n"
+        outstr += prefix + "ofp header:\n"
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_multipart_reply.show(self)
+        outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
+        for obj in self.stats:
+            outstr += obj.show()
+        return outstr
+
+    def __eq__(self, other):
+        if type(self) != type(other): return False
+        return (self.header == other.header and
+                ofp_multipart_reply.__eq__(self, other) and
+                self.stats == other.stats)
+
+    def __ne__(self, other): return not self.__eq__(other)
+
 
 
 # @todo Add buckets to group and group_desc stats obejcts"
@@ -3782,21 +4395,30 @@ message_type_list = (
     flow_mod_failed_error_msg,
     flow_removed,
     flow_stats_reply,
-    flow_stats_request,
     get_config_reply,
     get_config_request,
     group_desc_stats_request,
     group_desc_stats_reply,
+    group_features_stats_request,
+    group_features_stats_reply,    
     group_stats_request,
     group_stats_reply,
     group_mod,
     group_mod_failed_error_msg,
     hello,
     hello_failed_error_msg,
+    meter_multipart_request,
+    meter_multipart_reply,
+    meter_config_stats_request,
+    meter_config_stats_reply,
+    meter_features_stats_request,    
+    meter_features_stats_reply,
     packet_in,
     packet_out,
     port_mod,
     port_mod_failed_error_msg,
+    port_desc_stats_reply,
+    port_desc_stats_request,    
     port_stats_reply,
     port_stats_request,
     port_status,
@@ -3809,7 +4431,10 @@ message_type_list = (
     switch_config_failed_error_msg,
     table_mod,
     table_mod_failed_error_msg,
+    table_features_stats_request,
+    table_features_stats_reply,
     table_stats_reply,
     table_stats_request,
+    
     )
 
