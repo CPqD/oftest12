@@ -4298,12 +4298,12 @@ class ofp_flow_mod(object):
         end = start + struct.calcsize(fmt)
         (self.pad[0], self.pad[1]) = struct.unpack(fmt, binaryString[start:end])
         self.match.unpack(binaryString[40:])
-        return binaryString[48:]
+        return binaryString[44:]
 
     def __len__(self):
         """Return length of message
         """
-        l = 48
+        l = 44
         return l
 
     def __eq__(self, other):
