@@ -18,6 +18,8 @@ indicated oin oft_config
 import sys
 import logging
 
+import trace
+
 import unittest
 
 import oftest.match as match
@@ -41,6 +43,12 @@ basic_logger = None
 basic_config = None
 
 test_prio = {}
+
+IPV4_ETHERTYPE = 0x0800
+ETHERTYPE_VLAN = 0x8100
+ETHERTYPE_MPLS = 0x8847
+TCP_PROTOCOL = 0x6
+UDP_PROTOCOL = 0x11
 
 def test_set_init(config):
     """
@@ -211,12 +219,41 @@ class PacketIn(SimpleDataPlane):
         # Send packet to dataplane, once to each port
         # Poll controller with expect message type packet in
 
+#        of_ports = basic_port_map.keys()
+#        of_ports.sort()
+#        ing_port = of_ports[0]
+#        egr_port = of_ports[3]
+
         rc = testutils.delete_all_flows(self.controller, basic_logger)
         self.assertEqual(rc, 0, "Failed to delete all flows")
 
+        # Need to insert flow fowarding packets to the controller!!!
+        request = message.flow_mod()
+        request.match.type = ofp.OFPMT_OXM
+        eth_type = match.eth_type(IPV4_ETHERTYPE)
+        eth_dst = match.eth_dst(parse.parse_mac("00:01:02:03:04:05"))
+        ipv6_src = match.ipv4_src(ipaddr.IPv4Address('192.168.0.1'))
+        
+        request.match_fields.tlvs.append(eth_type)
+        request.match_fields.tlvs.append(eth_dst)
+        request.match_fields.tlvs.append(ipv6_src)
+        act = action.action_output()
+        act.port = ofp.OFPP_CONTROLLER
+        act.max_len = ofp.OFPCML_NO_BUFFER
+        inst = instruction.instruction_apply_actions()
+        inst.actions.add(act)
+        request.instructions.add(inst)
+        request.buffer_id = 0xffffffff
+        
+        request.priority = 1000
+        basic_logger.debug("Adding flow ")
+
+        rv = self.controller.message_send(request)
+        self.assertTrue(rv != -1, "Failed to insert test flow")
+        
         for of_port in basic_port_map.keys():
             basic_logger.info("PKT IN test, port " + str(of_port))
-            pkt = testutils.simple_tcp_packet()
+            pkt = testutils.simple_tcp_packet(dl_dst='00:01:02:03:04:05',ip_src='192.168.0.1')
             self.dataplane.send(of_port, str(pkt))
             #@todo Check for unexpected messages?
             (response, _) = self.controller.poll(ofp.OFPT_PACKET_IN, 2)
@@ -230,7 +267,6 @@ class PacketIn(SimpleDataPlane):
                 basic_logger.debug("resp len " + 
                                    str(len(str(response.data))) + 
                                    ": " + str(response.data))
-
             self.assertEqual(str(pkt), response.data,
                              'Response packet does not match send packet' +
                              ' for port ' + str(of_port))
@@ -287,13 +323,42 @@ class FlowRemoveAll(SimpleProtocol):
     def runTest(self):
         basic_logger.info("Running StatsGet")
         basic_logger.info("Inserting trial flow")
-        request = message.flow_mod()
-        request.buffer_id = 0xffffffff
+        # request = message.flow_mod()
+        # request.buffer_id = 0xffffffff
+        # request.match.type = ofp.OFPMT_OXM
+        # eth_type = match.eth_type(IPV4_ETHERTYPE)
+        # request.match_fields.tlvs.append(eth_type)
+
+        # act = action.action_output()
+        # act.port = ofp.OFPP_CONTROLLER
+        # act.max_len = ofp.OFPCML_NO_BUFFER
+        # inst = instruction.instruction_apply_actions()
+        # inst.actions.add(act)
+        # request.instructions.add(inst)
+
+        # request.priority = 1000
+        # basic_logger.debug("Adding flow")
+        # rv = self.controller.message_send(request)
+        # self.assertTrue(rv != -1, "Failed to insert test flow " )
+
         for i in range(1,5):
+            request = message.flow_mod()
+            request.buffer_id = 0xffffffff
+            request.match.type = ofp.OFPMT_OXM
+            eth_type = match.eth_type(IPV4_ETHERTYPE)
+            request.match_fields.tlvs.append(eth_type)
+
+            act = action.action_output()
+            act.port = ofp.OFPP_CONTROLLER
+            act.max_len = ofp.OFPCML_NO_BUFFER
+            inst = instruction.instruction_apply_actions()
+            inst.actions.add(act)
+            request.instructions.add(inst)
             request.priority = i*1000
             basic_logger.debug("Adding flow %d" % i)
             rv = self.controller.message_send(request)
             self.assertTrue(rv != -1, "Failed to insert test flow %d" % i)
+            
         basic_logger.info("Removing all flows")
         testutils.delete_all_flows(self.controller, basic_logger)
         basic_logger.info("Sending flow request")
@@ -307,8 +372,6 @@ class FlowRemoveAll(SimpleProtocol):
         self.assertEqual(len(response.stats),0)
         basic_logger.debug(response.show())
         
-
-
 class FlowStatsGet(SimpleProtocol):
     """
     Get stats 
@@ -316,11 +379,13 @@ class FlowStatsGet(SimpleProtocol):
     Simply verify stats get transaction
     """
     def runTest(self):
+
         basic_logger.info("Running StatsGet")
         basic_logger.info("Inserting trial flow")
         request = message.flow_mod()
         request.buffer_id = 0xffffffff
-        rv = self.controller.message_send(request)
+        
+        rv = self.controller.message_send(request)        
         self.assertTrue(rv != -1, "Failed to insert test flow")
         
         basic_logger.info("Sending flow request")

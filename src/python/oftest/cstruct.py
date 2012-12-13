@@ -1907,19 +1907,23 @@ class ofp_packet_in(object):
         Do not unpack empty array used as placeholder
         since they can contain heterogeneous type
         """
-        if (len(binaryString) < 24):
+        if (len(binaryString) < 20):
             return binaryString
-        fmt = '!LHBBQ'
+        fmt = '!LHBB'
         start = 0
         end = start + struct.calcsize(fmt)
-        (self.buffer_id, self.total_len, self.reason, self.table_id, self.cookie) = struct.unpack(fmt,  binaryString[start:end])
+        (self.buffer_id, self.total_len, self.reason, self.table_id) = struct.unpack(fmt,  binaryString[start:end])
+        start = end
+        fmt = '!Q'
+        end = start + struct.calcsize(fmt)
+        (self.cookie,) = struct.unpack(fmt,  binaryString[start:end])
         self.match.unpack(binaryString[16:])
-        return binaryString[24:]
+        return binaryString[20:]
 
     def __len__(self):
         """Return length of message
         """
-        l = 24
+        l = 20
         return l
 
     def __eq__(self, other):
@@ -4365,6 +4369,7 @@ class ofp_multipart_request(object):
         if(not isinstance(self.pad, list)):
             return (False, "self.pad is not list as expected.")
         if(len(self.pad) != 4):
+            print len(self.pad)
             return (False, "self.pad is not of size 4 as expected.")
         return (True, None)
 
@@ -5175,10 +5180,10 @@ class ofp_flow_stats_request(object):
         Declare members and default values
         """
         self.table_id = 0
-        self.pad= [0,0,0]
+        self.pad_fstat= [0,0,0]
         self.out_port = 0
         self.out_group = 0
-        self.pad2= [0,0,0,0]
+        self.pad_fstat2= [0,0,0,0]
         self.cookie = 0
         self.cookie_mask = 0
         self.match = ofp_match()
@@ -5187,14 +5192,14 @@ class ofp_flow_stats_request(object):
     def __assert(self):
         """Sanity check
         """
-        if(not isinstance(self.pad, list)):
-            return (False, "self.pad is not list as expected.")
-        if(len(self.pad) != 3):
-            return (False, "self.pad is not of size 3 as expected.")
-        if(not isinstance(self.pad2, list)):
-            return (False, "self.pad2 is not list as expected.")
-        if(len(self.pad2) != 4):
-            return (False, "self.pad2 is not of size 4 as expected.")
+        if(not isinstance(self.pad_fstat, list)):
+            return (False, "self.pad_fstat is not list as expected.")
+        if(len(self.pad_fstat) != 3):
+            return (False, "self.pad_fstat is not of size 3 as expected.")
+        if(not isinstance(self.pad_fstat2, list)):
+            return (False, "self.pad_fstat2 is not list as expected.")
+        if(len(self.pad_fstat2) != 4):
+            return (False, "self.pad_fstat2 is not of size 4 as expected.")
         if(not isinstance(self.match, ofp_match)):
             return (False, "self.match is not class ofp_match as expected.")
         return (True, None)
@@ -5208,9 +5213,9 @@ class ofp_flow_stats_request(object):
                 return None
         packed = ""
         packed += struct.pack("!B", self.table_id)
-        packed += struct.pack("!BBB", self.pad[0], self.pad[1], self.pad[2])
+        packed += struct.pack("!BBB", self.pad_fstat[0], self.pad_fstat[1], self.pad_fstat[2])
         packed += struct.pack("!LL", self.out_port, self.out_group)
-        packed += struct.pack("!BBBB", self.pad2[0], self.pad2[1], self.pad2[2], self.pad2[3])
+        packed += struct.pack("!BBBB", self.pad_fstat2[0], self.pad_fstat2[1], self.pad_fstat2[2], self.pad_fstat2[3])
         packed += struct.pack("!QQ", self.cookie, self.cookie_mask)
         packed += self.match.pack()
         return packed
@@ -5229,7 +5234,7 @@ class ofp_flow_stats_request(object):
         fmt = '!BBB'
         start = 1
         end = start + struct.calcsize(fmt)
-        (self.pad[0], self.pad[1], self.pad[2]) = struct.unpack(fmt, binaryString[start:end])
+        (self.pad_fstat[0], self.pad_fstat[1], self.pad_fstat[2]) = struct.unpack(fmt, binaryString[start:end])
         fmt = '!LL'
         start = 4
         end = start + struct.calcsize(fmt)
@@ -5237,7 +5242,7 @@ class ofp_flow_stats_request(object):
         fmt = '!BBBB'
         start = 12
         end = start + struct.calcsize(fmt)
-        (self.pad2[0], self.pad2[1], self.pad2[2], self.pad2[3]) = struct.unpack(fmt, binaryString[start:end])
+        (self.pad_fstat2[0], self.pad_fstat2[1], self.pad_fstat2[2], self.pad_fstat2[3]) = struct.unpack(fmt, binaryString[start:end])
         fmt = '!QQ'
         start = 16
         end = start + struct.calcsize(fmt)
@@ -5256,10 +5261,10 @@ class ofp_flow_stats_request(object):
         """
         if type(self) != type(other): return False
         if self.table_id !=  other.table_id: return False
-        if self.pad !=  other.pad: return False
+        if self.pad_fstat !=  other.pad_fstat: return False
         if self.out_port !=  other.out_port: return False
         if self.out_group !=  other.out_group: return False
-        if self.pad2 !=  other.pad2: return False
+        if self.pad_fstat2 !=  other.pad_fstat2: return False
         if self.cookie !=  other.cookie: return False
         if self.cookie_mask !=  other.cookie_mask: return False
         if self.match !=  other.match: return False
@@ -5534,17 +5539,16 @@ class ofp_match(object):
         """Initialize
         Declare members and default values
         """
-        self.type = 0
+        self.type = OFPMT_OXM
         self.length = 0
-        self.oxm_fields= [0,0,0,0]
 
     def __assert(self):
         """Sanity check
         """
-        if(not isinstance(self.oxm_fields, list)):
-            return (False, "self.oxm_fields is not list as expected.")
-        if(len(self.oxm_fields) != 4):
-            return (False, "self.oxm_fields is not of size 4 as expected.")
+#        if(not isinstance(self.oxm_fields, list)):
+#            return (False, "self.oxm_fields is not list as expected.")
+#        if(len(self.oxm_fields) != 4):
+#            return (False, "self.oxm_fields is not of size 4 as expected.")
         return (True, None)
 
     def pack(self, assertstruct=True):
@@ -5556,30 +5560,43 @@ class ofp_match(object):
                 return None
         packed = ""
         packed += struct.pack("!HH", self.type, self.length)
-        packed += struct.pack("!BBBB", self.oxm_fields[0], self.oxm_fields[1], self.oxm_fields[2], self.oxm_fields[3])
         return packed
+#        if(assertstruct):
+#            if(not self.__assert()[0]):
+#                return None
+#        packed = ""
+#        packed += struct.pack("!HH", self.type, self.length)
+#        packed += struct.pack("!BBBB", self.oxm_fields[0], self.oxm_fields[1], self.oxm_fields[2], self.oxm_fields[3])
+#        return packed
 
     def unpack(self, binaryString):
         """Unpack message
         Do not unpack empty array used as placeholder
         since they can contain heterogeneous type
         """
-        if (len(binaryString) < 8):
+        if (len(binaryString) < 4):
             return binaryString
         fmt = '!HH'
         start = 0
         end = start + struct.calcsize(fmt)
         (self.type, self.length) = struct.unpack(fmt,  binaryString[start:end])
-        fmt = '!BBBB'
-        start = 4
-        end = start + struct.calcsize(fmt)
-        (self.oxm_fields[0], self.oxm_fields[1], self.oxm_fields[2], self.oxm_fields[3]) = struct.unpack(fmt, binaryString[start:end])
-        return binaryString[8:]
+        return binaryString[4:]
+#        if (len(binaryString) < 8):
+#            return binaryString
+#        fmt = '!HH'
+#        start = 0
+#        end = start + struct.calcsize(fmt)
+#        (self.type, self.length) = struct.unpack(fmt,  binaryString[start:end])
+#        fmt = '!BBBB'
+#        start = 4
+#        end = start + struct.calcsize(fmt)
+#        (self.oxm_fields[0], self.oxm_fields[1], self.oxm_fields[2], self.oxm_fields[3]) = struct.unpack(fmt, binaryString[start:end])
+#        return binaryString[8:]
 
     def __len__(self):
         """Return length of message
         """
-        l = 8
+        l = 4
         return l
 
     def __eq__(self, other):
@@ -5588,7 +5605,7 @@ class ofp_match(object):
         if type(self) != type(other): return False
         if self.type !=  other.type: return False
         if self.length !=  other.length: return False
-        if self.oxm_fields !=  other.oxm_fields: return False
+#        if self.oxm_fields !=  other.oxm_fields: return False
         return True
 
     def __ne__(self, other): return not self.__eq__(other)
@@ -5599,7 +5616,7 @@ class ofp_match(object):
         outstr = ''
         outstr += prefix + 'type: ' + str(self.type) + '\n'
         outstr += prefix + 'length: ' + str(self.length) + '\n'
-        outstr += prefix + 'oxm_fields: ' + str(self.oxm_fields) + '\n'
+#        outstr += prefix + 'oxm_fields: ' + str(self.oxm_fields) + '\n'
         return outstr
 
 
@@ -7623,7 +7640,7 @@ OFP_INSTRUCTION_ACTIONS_BYTES = 8
 OFP_INSTRUCTION_GOTO_TABLE_BYTES = 8
 OFP_INSTRUCTION_METER_BYTES = 8
 OFP_INSTRUCTION_WRITE_METADATA_BYTES = 24
-OFP_MATCH_BYTES = 8
+OFP_MATCH_BYTES = 4
 OFP_METER_BAND_DROP_BYTES = 16
 OFP_METER_BAND_DSCP_REMARK_BYTES = 16
 OFP_METER_BAND_EXPERIMENTER_BYTES = 16
@@ -7637,7 +7654,7 @@ OFP_METER_STATS_BYTES = 40
 OFP_MULTIPART_REPLY_BYTES = 8
 OFP_MULTIPART_REQUEST_BYTES = 8
 OFP_OXM_EXPERIMENTER_HEADER_BYTES = 8
-OFP_PACKET_IN_BYTES = 24
+OFP_PACKET_IN_BYTES = 20
 OFP_PACKET_OUT_BYTES = 16
 OFP_PACKET_QUEUE_BYTES = 16
 OFP_PORT_BYTES = 64
