@@ -378,7 +378,7 @@ def port_config_get(controller, port_no, logger):
     @returns (hwaddr, config, advert) The hwaddress, configuration and
     advertised values
     """
-    request = message.features_request()
+    request = message.port_desc_stats_request()
     reply, _ = controller.transact(request, timeout=2)
     if reply is None:
         logger.warn("Get feature request failed")
@@ -400,7 +400,7 @@ def port_config_set(controller, port_no, config, mask, logger):
     configuration value according to config and mask
     """
     logger.info("Setting port " + str(port_no) + " to config " + str(config))
-    request = message.features_request()
+    request = message.port_desc_stats_request()
     reply, _ = controller.transact(request, timeout=2)
     if reply is None:
         return -1

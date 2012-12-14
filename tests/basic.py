@@ -358,7 +358,7 @@ class FlowRemoveAll(SimpleProtocol):
             basic_logger.debug("Adding flow %d" % i)
             rv = self.controller.message_send(request)
             self.assertTrue(rv != -1, "Failed to insert test flow %d" % i)
-            
+
         basic_logger.info("Removing all flows")
         testutils.delete_all_flows(self.controller, basic_logger)
         basic_logger.info("Sending flow request")
@@ -450,9 +450,9 @@ class PortConfigMod(SimpleProtocol):
         # Verify change took place with same feature request
         (_, config2, _) = \
             testutils.port_config_get(self.controller, of_port, basic_logger)
+        self.assertTrue(config2 is not None, "Did not get port config2")
         basic_logger.debug("No packet_in bit port " + str(of_port) + " is now " + 
                            str(config2 & ofp.OFPPC_NO_PACKET_IN))
-        self.assertTrue(config2 is not None, "Did not get port config2")
         self.assertTrue(config2 & ofp.OFPPC_NO_PACKET_IN !=
                         config & ofp.OFPPC_NO_PACKET_IN,
                         "Bit change did not take")

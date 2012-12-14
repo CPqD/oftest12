@@ -5248,12 +5248,12 @@ class ofp_flow_stats_request(object):
         end = start + struct.calcsize(fmt)
         (self.cookie, self.cookie_mask) = struct.unpack(fmt,  binaryString[start:end])
         self.match.unpack(binaryString[32:])
-        return binaryString[40:]
+        return binaryString[36:]
 
     def __len__(self):
         """Return length of message
         """
-        l = 40
+        l = 36
         return l
 
     def __eq__(self, other):
@@ -7624,10 +7624,10 @@ OFP_ERROR_EXPERIMENTER_MSG_BYTES = 8
 OFP_ERROR_MSG_BYTES = 4
 OFP_EXPERIMENTER_HEADER_BYTES = 8
 OFP_EXPERIMENTER_STATS_HEADER_BYTES = 8
-OFP_FLOW_MOD_BYTES = 48
+OFP_FLOW_MOD_BYTES = 44
 OFP_FLOW_REMOVED_BYTES = 48
 OFP_FLOW_STATS_BYTES = 56
-OFP_FLOW_STATS_REQUEST_BYTES = 40
+OFP_FLOW_STATS_REQUEST_BYTES = 36
 OFP_GROUP_DESC_STATS_BYTES = 8
 OFP_GROUP_FEATURES_STATS_BYTES = 40
 OFP_GROUP_MOD_BYTES = 8

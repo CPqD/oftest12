@@ -2924,7 +2924,7 @@ class flow_stats_entry(ofp_flow_stats):
     def show(self, prefix=''):
         outstr = prefix + "flow_stats_entry\n"
         outstr += ofp_flow_stats.show(self, prefix + '  ')
-        outstr += self.match_fields.show(self, prefix + '  ')
+        outstr += self.match_fields.show(prefix + '  ')
         outstr += self.instructions.show(prefix + '  ')
         return outstr
 
@@ -3380,7 +3380,7 @@ class port_desc_stats_request(ofp_multipart_request, ofp_port_desc_stats_request
     def __init__(self):
         self.header = ofp_header()
         ofp_multipart_request.__init__(self)
-        ofp_port_stats_request.__init__(self)
+        ofp_port_desc_stats_request.__init__(self)
         self.header.type = OFPT_MULTIPART_REQUEST
         self.type = OFPMP_PORT_DESC
 
@@ -3430,13 +3430,13 @@ class port_desc_stats_reply(ofp_multipart_reply):
         self.header.type = OFPT_MULTIPART_REPLY
         self.type = OFPMP_PORT_DESC
         # stats: Array of type port_desc_stats_entry
-        self.stats = []
+        self.ports = []
 
     def pack(self, assertstruct=True):
         self.header.length = len(self)
         packed = self.header.pack()
         packed += ofp_multipart_reply.pack(self)
-        for obj in self.stats:
+        for obj in self.ports:
             packed += obj.pack()
         return packed
 
@@ -3447,14 +3447,14 @@ class port_desc_stats_reply(ofp_multipart_reply):
         while len(binary_string) >= len(dummy):
             obj = port_desc_stats_entry()
             binary_string = obj.unpack(binary_string)
-            self.stats.append(obj)
+            self.ports.append(obj)
         if len(binary_string) != 0:
-            print "ERROR unpacking port stats string: extra bytes"
+            print "ERROR unpacking port desc string: extra bytes"
         return binary_string
 
     def __len__(self):
         length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
-        for obj in self.stats:
+        for obj in self.ports:
             length += len(obj)
         return length
 
@@ -3463,8 +3463,8 @@ class port_desc_stats_reply(ofp_multipart_reply):
         outstr += prefix + "ofp header:\n"
         outstr += self.header.show(prefix + '  ')
         outstr += ofp_multipart_reply.show(self)
-        outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
-        for obj in self.stats:
+        outstr += prefix + "Stats array of length " + str(len(self.ports)) + '\n'
+        for obj in self.ports:
             outstr += obj.show()
         return outstr
 
@@ -3472,7 +3472,7 @@ class port_desc_stats_reply(ofp_multipart_reply):
         if type(self) != type(other): return False
         return (self.header == other.header and
                 ofp_multipart_reply.__eq__(self, other) and
-                self.stats == other.stats)
+                self.ports == other.ports)
 
     def __ne__(self, other): return not self.__eq__(other)
 
