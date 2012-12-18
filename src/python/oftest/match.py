@@ -54,7 +54,7 @@ class oxm_tlv:
         "oxm_tlv_field=" + hex(self.field),
         "oxm_tlv_hasmask=" + str(bool(self.hasmask)),
         "oxm_tlv_length: " + hex(self.length),
-        "value: " + str(self.value),))
+        "value: " + str(self.value).encode('hex'),))
 
 
 def roundup (x,y): 

@@ -525,7 +525,7 @@ class Controller(Thread):
             return
         self.handlers[msg_type] = handler
 
-    def poll(self, exp_msg=None, timeout=None):
+    def poll(self, exp_msg=None, timeout=None, xid=None):
         """
         Wait for the next OF message received from the switch.
 
@@ -558,7 +558,12 @@ class Controller(Thread):
             else:
                 for i in range(len(self.packets)):
                     msg = self.packets[i][0]
-                    if msg.header.type == exp_msg:
+                    if xid != None :
+                        if msg.header.xid == xid :
+                            (msg, pkt) = self.packets.pop(i)
+                            self.sync.release()
+                            return (msg, pkt)
+                    elif msg.header.type == exp_msg:
                         (msg, pkt) = self.packets.pop(i)
                         self.sync.release()
                         return (msg, pkt)

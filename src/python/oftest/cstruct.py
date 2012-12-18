@@ -571,10 +571,10 @@ class ofp_group_stats(object):
         Declare members and default values
         """
         self.length = 0
-        self.pad= [0,0]
+        self.pad_grst= [0,0]
         self.group_id = 0
         self.ref_count = 0
-        self.pad2= [0,0,0,0]
+        self.pad_grst2= [0,0,0,0]
         self.packet_count = 0
         self.byte_count = 0
         self.duration_sec = 0
@@ -583,13 +583,13 @@ class ofp_group_stats(object):
     def __assert(self):
         """Sanity check
         """
-        if(not isinstance(self.pad, list)):
+        if(not isinstance(self.pad_grst, list)):
             return (False, "self.pad is not list as expected.")
-        if(len(self.pad) != 2):
+        if(len(self.pad_grst) != 2):
             return (False, "self.pad is not of size 2 as expected.")
-        if(not isinstance(self.pad2, list)):
+        if(not isinstance(self.pad_grst2, list)):
             return (False, "self.pad2 is not list as expected.")
-        if(len(self.pad2) != 4):
+        if(len(self.pad_grst2) != 4):
             return (False, "self.pad2 is not of size 4 as expected.")
         return (True, None)
 
@@ -602,9 +602,9 @@ class ofp_group_stats(object):
                 return None
         packed = ""
         packed += struct.pack("!H", self.length)
-        packed += struct.pack("!BB", self.pad[0], self.pad[1])
+        packed += struct.pack("!BB", self.pad_grst[0], self.pad_grst[1])
         packed += struct.pack("!LL", self.group_id, self.ref_count)
-        packed += struct.pack("!BBBB", self.pad2[0], self.pad2[1], self.pad2[2], self.pad2[3])
+        packed += struct.pack("!BBBB", self.pad_grst2[0], self.pad_grst2[1], self.pad_grst2[2], self.pad_grst2[3])
         packed += struct.pack("!QQLL", self.packet_count, self.byte_count, self.duration_sec, self.duration_nsec)
         return packed
 
@@ -622,7 +622,7 @@ class ofp_group_stats(object):
         fmt = '!BB'
         start = 2
         end = start + struct.calcsize(fmt)
-        (self.pad[0], self.pad[1]) = struct.unpack(fmt, binaryString[start:end])
+        (self.pad_grst[0], self.pad_grst[1]) = struct.unpack(fmt, binaryString[start:end])
         fmt = '!LL'
         start = 4
         end = start + struct.calcsize(fmt)
@@ -630,7 +630,7 @@ class ofp_group_stats(object):
         fmt = '!BBBB'
         start = 12
         end = start + struct.calcsize(fmt)
-        (self.pad2[0], self.pad2[1], self.pad2[2], self.pad2[3]) = struct.unpack(fmt, binaryString[start:end])
+        (self.pad_grst2[0], self.pad_grst2[1], self.pad_grst2[2], self.pad_grst2[3]) = struct.unpack(fmt, binaryString[start:end])
         fmt = '!QQLL'
         start = 16
         end = start + struct.calcsize(fmt)
@@ -1680,10 +1680,10 @@ class ofp_aggregate_stats_request(object):
         Declare members and default values
         """
         self.table_id = 0
-        self.pad= [0,0,0]
+        self.pad_asr= [0,0,0]
         self.out_port = 0
         self.out_group = 0
-        self.pad2= [0,0,0,0]
+        self.pad_asr2= [0,0,0,0]
         self.cookie = 0
         self.cookie_mask = 0
         self.match = ofp_match()
@@ -1692,13 +1692,13 @@ class ofp_aggregate_stats_request(object):
     def __assert(self):
         """Sanity check
         """
-        if(not isinstance(self.pad, list)):
+        if(not isinstance(self.pad_asr, list)):
             return (False, "self.pad is not list as expected.")
-        if(len(self.pad) != 3):
+        if(len(self.pad_asr) != 3):
             return (False, "self.pad is not of size 3 as expected.")
-        if(not isinstance(self.pad2, list)):
+        if(not isinstance(self.pad_asr2, list)):
             return (False, "self.pad2 is not list as expected.")
-        if(len(self.pad2) != 4):
+        if(len(self.pad_asr2) != 4):
             return (False, "self.pad2 is not of size 4 as expected.")
         if(not isinstance(self.match, ofp_match)):
             return (False, "self.match is not class ofp_match as expected.")
@@ -1713,9 +1713,9 @@ class ofp_aggregate_stats_request(object):
                 return None
         packed = ""
         packed += struct.pack("!B", self.table_id)
-        packed += struct.pack("!BBB", self.pad[0], self.pad[1], self.pad[2])
+        packed += struct.pack("!BBB", self.pad_asr[0], self.pad_asr[1], self.pad_asr[2])
         packed += struct.pack("!LL", self.out_port, self.out_group)
-        packed += struct.pack("!BBBB", self.pad2[0], self.pad2[1], self.pad2[2], self.pad2[3])
+        packed += struct.pack("!BBBB", self.pad_asr2[0], self.pad_asr2[1], self.pad_asr2[2], self.pad_asr2[3])
         packed += struct.pack("!QQ", self.cookie, self.cookie_mask)
         packed += self.match.pack()
         return packed
@@ -1725,7 +1725,7 @@ class ofp_aggregate_stats_request(object):
         Do not unpack empty array used as placeholder
         since they can contain heterogeneous type
         """
-        if (len(binaryString) < 40):
+        if (len(binaryString) < 36):
             return binaryString
         fmt = '!B'
         start = 0
@@ -1734,7 +1734,7 @@ class ofp_aggregate_stats_request(object):
         fmt = '!BBB'
         start = 1
         end = start + struct.calcsize(fmt)
-        (self.pad[0], self.pad[1], self.pad[2]) = struct.unpack(fmt, binaryString[start:end])
+        (self.pad_asr[0], self.pad_asr[1], self.pad_asr[2]) = struct.unpack(fmt, binaryString[start:end])
         fmt = '!LL'
         start = 4
         end = start + struct.calcsize(fmt)
@@ -1742,18 +1742,18 @@ class ofp_aggregate_stats_request(object):
         fmt = '!BBBB'
         start = 12
         end = start + struct.calcsize(fmt)
-        (self.pad2[0], self.pad2[1], self.pad2[2], self.pad2[3]) = struct.unpack(fmt, binaryString[start:end])
+        (self.pad_asr2[0], self.pad_asr2[1], self.pad_asr2[2], self.pad_asr2[3]) = struct.unpack(fmt, binaryString[start:end])
         fmt = '!QQ'
         start = 16
         end = start + struct.calcsize(fmt)
         (self.cookie, self.cookie_mask) = struct.unpack(fmt,  binaryString[start:end])
         self.match.unpack(binaryString[32:])
-        return binaryString[40:]
+        return binaryString[36:]
 
     def __len__(self):
         """Return length of message
         """
-        l = 40
+        l = 36
         return l
 
     def __eq__(self, other):
@@ -7615,7 +7615,7 @@ OFP_ACTION_PUSH_BYTES = 8
 OFP_ACTION_SET_FIELD_BYTES = 8
 OFP_ACTION_SET_QUEUE_BYTES = 8
 OFP_AGGREGATE_STATS_REPLY_BYTES = 24
-OFP_AGGREGATE_STATS_REQUEST_BYTES = 40
+OFP_AGGREGATE_STATS_REQUEST_BYTES = 36
 OFP_ASYNC_CONFIG_BYTES = 24
 OFP_BUCKET_BYTES = 16
 OFP_BUCKET_COUNTER_BYTES = 16

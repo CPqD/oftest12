@@ -1,3 +1,4 @@
+
 """
 Group table test cases.
 """
@@ -183,14 +184,14 @@ class GroupTest(basic.SimpleDataPlane):
 
 
 
-    def send_ctrl_exp_reply(self, msg, resp_type = ofp.OFPT_ERROR, log = ''):
+    def send_ctrl_exp_reply(self, msg, resp_type = ofp.OFPT_ERROR, log = '', local_xid=None):
         group_logger.info('Sending message ' + log)
         group_logger.debug(msg.show())
         rv = self.controller.message_send(msg)
         self.assertTrue(rv != -1, 'Error sending!')
 
         group_logger.info('Waiting for error messages...')
-        (response, raw) = self.controller.poll(resp_type, 1)
+        (response, raw) = self.controller.poll(resp_type, 1, xid = local_xid)
 
         self.assertTrue(response is not None, 'Did not receive expected message')
 
@@ -806,6 +807,8 @@ class GroupProcChain(GroupTest):
 """
 Working (specific)
 """
+import ipaddr
+
 
 class GroupProcAll(GroupTest):
     """
@@ -846,7 +849,7 @@ class GroupProcAll(GroupTest):
         self.send_ctrl_exp_noerror(flow_add_msg, 'flow add')
 
         self.send_data(packet_in, 1)
-        
+
         self.recv_data(2, packet_out1)
         self.recv_data(3, packet_out2)
         self.recv_data(4, packet_out3)
@@ -1060,14 +1063,14 @@ class GroupStats(GroupTest):
 
         response = \
         self.send_ctrl_exp_reply(group_stats_req,
-                                 ofp.OFPT_STATS_REPLY, 'group stat')
+                                 ofp.OFPT_MULTIPART_REPLY, 'group stat', group_stats_req.header.xid)
 
         exp_len = ofp.OFP_HEADER_BYTES + \
-                  ofp.OFP_STATS_REPLY_BYTES + \
+                  ofp.OFP_MULTIPART_REPLY_BYTES + \
                   ofp.OFP_GROUP_STATS_BYTES + \
                   ofp.OFP_BUCKET_COUNTER_BYTES * 2
 
-        self.assertEqual(len(response), exp_len,
+        self.assertEqual(response.header.length, exp_len,
                          'Received packet length does not equal expected length')
         # XXX Zoltan: oftest group_stats_req handling needs to be fixed
         #             right now only the expected message length is checked
@@ -1139,16 +1142,16 @@ class GroupStatsAll(GroupTest):
 
         response = \
         self.send_ctrl_exp_reply(group_stats_req,
-                                 ofp.OFPT_STATS_REPLY, 'group stat')
+                                 ofp.OFPT_MULTIPART_REPLY, 'group stat', group_stats_req.header.xid)
 
         exp_len = ofp.OFP_HEADER_BYTES + \
-                  ofp.OFP_STATS_REPLY_BYTES + \
+                  ofp.OFP_MULTIPART_REPLY_BYTES + \
                   ofp.OFP_GROUP_STATS_BYTES + \
                   ofp.OFP_BUCKET_COUNTER_BYTES * 2 + \
                   ofp.OFP_GROUP_STATS_BYTES + \
                   ofp.OFP_BUCKET_COUNTER_BYTES * 2
 
-        self.assertEqual(len(response), exp_len,
+        self.assertEqual(response.header.length, exp_len,
                          'Received packet length does not equal expected length')
         # XXX Zoltan: oftest group_stats_req handling needs to be fixed
         #             right now only the expected message length is checked
@@ -1187,10 +1190,10 @@ class GroupDescStats(GroupTest):
 
         response = \
         self.send_ctrl_exp_reply(group_desc_stats_req,
-                                 ofp.OFPT_STATS_REPLY, 'group desc stat')
+                                 ofp.OFPT_MULTIPART_REPLY, 'group desc stat')
 
         exp_len = ofp.OFP_HEADER_BYTES + \
-                  ofp.OFP_STATS_REPLY_BYTES + \
+                  ofp.OFP_MULTIPART_REPLY_BYTES + \
                   ofp.OFP_GROUP_DESC_STATS_BYTES + \
                   len(b1) + len(b2) + len(b3)
 
@@ -1282,7 +1285,7 @@ class GroupFlowSelect(GroupTest):
 
         response = \
         self.send_ctrl_exp_reply(aggr_stat_req,
-                                 ofp.OFPT_STATS_REPLY, 'aggr stat')
+                                 ofp.OFPT_MULTIPART_REPLY, 'aggr stat')
 
         self.assertEqual(response.stats[0].flow_count, 2,
                          'Did not match expected flow count')
@@ -1351,7 +1354,7 @@ class GroupFlowSelectAll(GroupTest):
 
         response = \
         self.send_ctrl_exp_reply(aggr_stat_req,
-                                 ofp.OFPT_STATS_REPLY, 'group desc stat')
+                                 ofp.OFPT_MULTIPART_REPLY, 'group desc stat')
 
         self.assertEqual(response.stats[0].flow_count, 4,
                          'Did not match expected flow count')
