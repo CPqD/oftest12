@@ -648,10 +648,10 @@ class ofp_group_stats(object):
         """
         if type(self) != type(other): return False
         if self.length !=  other.length: return False
-        if self.pad !=  other.pad: return False
+        if self.pad_grst !=  other.pad_grst: return False
         if self.group_id !=  other.group_id: return False
         if self.ref_count !=  other.ref_count: return False
-        if self.pad2 !=  other.pad2: return False
+        if self.pad_grst2 !=  other.pad_grst2: return False
         if self.packet_count !=  other.packet_count: return False
         if self.byte_count !=  other.byte_count: return False
         if self.duration_sec !=  other.duration_sec: return False

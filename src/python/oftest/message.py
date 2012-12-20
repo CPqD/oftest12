@@ -3656,6 +3656,14 @@ class group_stats_reply(ofp_multipart_reply):
         while len(binary_string) >= len(dummy):
             obj = group_stats_entry()
             binary_string = obj.unpack(binary_string)
+            obj.bucket_stats = []
+            dummy_ad = ofp_bucket_counter()
+            length_to_go = obj.length - len(dummy)
+            while length_to_go > 0 :
+                obj_counter = ofp_bucket_counter()
+                binary_string = obj_counter.unpack(binary_string)
+                obj.bucket_stats.append(obj_counter)
+                length_to_go -= len(dummy_ad)
             self.stats.append(obj)
         if len(binary_string) != 0:
             print "ERROR unpacking group stats string: extra bytes"
@@ -3665,6 +3673,8 @@ class group_stats_reply(ofp_multipart_reply):
         length = len(self.header) + OFP_MULTIPART_REPLY_BYTES
         for obj in self.stats:
             length += len(obj)
+            for bucket_obj in obj.bucket_stats :
+                length += len(bucket_obj)
         return length
 
     def show(self, prefix=''):
@@ -3675,6 +3685,8 @@ class group_stats_reply(ofp_multipart_reply):
         outstr += prefix + "Stats array of length " + str(len(self.stats)) + '\n'
         for obj in self.stats:
             outstr += obj.show()
+            for bucket_obj in obj.bucket_stats:
+                outstr += bucket_obj.show()
         return outstr
 
     def __eq__(self, other):
