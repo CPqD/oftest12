@@ -42,6 +42,7 @@ class oxm_tlv:
             packed += self.value.packed
             if self.hasmask:
                 packed += self.mask.packed
+                # packed += struct.pack("!QQ", self.mask[0], self.mask[1])
         return packed
     
     def __len__(self):
@@ -151,7 +152,7 @@ class eth_src(oxm_tlv):
     @arg body
 
     """
-    def __init__(self, value, hasmask = False):
+    def __init__(self, value, hasmask = False, mask = None):
         if not hasmask:
             oxm_tlv.__init__(self, OFPXMT_OFB_ETH_SRC, hasmask, 6, value)
         else:
@@ -280,7 +281,7 @@ class ipv4_src(oxm_tlv):
     @arg body
 
     """
-    def __init__(self, value, hasmask = False):
+    def __init__(self, value, hasmask = False, mask = None):
         if not hasmask:
             oxm_tlv.__init__(self, OFPXMT_OFB_IPV4_SRC, hasmask, 4, value)
         else: 
@@ -301,7 +302,7 @@ class ipv4_dst(oxm_tlv):
     @arg body
 
     """
-    def __init__(self, value, hasmask = False):
+    def __init__(self, value, hasmask = False, mask = None):
         if not hasmask:
             oxm_tlv.__init__(self, OFPXMT_OFB_IPV4_DST, hasmask, 4, value)
         else:
@@ -485,7 +486,7 @@ class arp_spa(oxm_tlv):
     @arg body
 
     """
-    def __init__(self, value, hasmask = False):
+    def __init__(self, value, hasmask = False, mask = None):
         if not hasmask:
             oxm_tlv.__init__(self, OFPXMT_OFB_ARP_SPA, hasmask, 4, value)
         else: 
@@ -506,7 +507,7 @@ class arp_tpa(oxm_tlv):
     @arg body
 
     """
-    def __init__(self, value, hasmask = False):
+    def __init__(self, value, hasmask = False, mask = None):
         if not hasmask:
             oxm_tlv.__init__(self, OFPXMT_OFB_ARP_TPA, hasmask, 4, value)
         else: 
@@ -528,11 +529,11 @@ class arp_sha(oxm_tlv):
     @arg body
 
     """
-    def __init__(self, value, hasmask = False):
+    def __init__(self, value, hasmask = False, mask = None):
         if not hasmask:
             oxm_tlv.__init__(self, OFPXMT_OFB_ARP_SHA, hasmask, 6, value)
         else:
-            oxm_tlv.__init__(self, OFPXMT_OFB_ARP_SHA, hasmask, 12, value)            
+            oxm_tlv.__init__(self, OFPXMT_OFB_ARP_SHA, hasmask, 12, value, mask)            
     def show(self, prefix=''):
         outstr = prefix + "arp_sha\n"
         outstr += oxm_tlv.show(self, prefix)
@@ -549,11 +550,11 @@ class arp_tha(oxm_tlv):
     @arg body
 
     """
-    def __init__(self, value, hasmask = False):
+    def __init__(self, value, hasmask = False, mask = None):
         if not hasmask:
             oxm_tlv.__init__(self, OFPXMT_OFB_ARP_THA, hasmask, 6, value)
         else:
-            oxm_tlv.__init__(self, OFPXMT_OFB_ARP_THA, hasmask, 12, value)            
+            oxm_tlv.__init__(self, OFPXMT_OFB_ARP_THA, hasmask, 12, value, mask)            
     def show(self, prefix=''):
         outstr = prefix + "arp_tha\n"
         outstr += oxm_tlv.show(self, prefix)
@@ -570,11 +571,11 @@ class ipv6_src(oxm_tlv):
     @arg body
 
     """
-    def __init__(self, value, hasmask = False):
+    def __init__(self, value, hasmask = False, mask = None):
         if not hasmask:
             oxm_tlv.__init__(self, OFPXMT_OFB_IPV6_SRC, False, 16, value)
         else:
-            oxm_tlv.__init__(self, OFPXMT_OFB_IPV6_SRC, True, 32, value)            
+            oxm_tlv.__init__(self, OFPXMT_OFB_IPV6_SRC, True, 32, value, mask)            
     def show(self, prefix=''):
         outstr = prefix + "ipv6_src\n"
         outstr += oxm_tlv.show(self, prefix)
@@ -591,11 +592,11 @@ class ipv6_dst(oxm_tlv):
     @arg body
 
     """
-    def __init__(self, value, hasmask = False):
+    def __init__(self, value, hasmask = False, mask = None):
         if not hasmask:
             oxm_tlv.__init__(self, OFPXMT_OFB_IPV6_DST, False, 16, value)
         else:
-            oxm_tlv.__init__(self, OFPXMT_OFB_IPV6_DST, True, 32, value)            
+            oxm_tlv.__init__(self, OFPXMT_OFB_IPV6_DST, True, 32, value, mask)            
     def show(self, prefix=''):
         outstr = prefix + "ipv6_dst\n"
         outstr += oxm_tlv.show(self, prefix)
@@ -612,11 +613,11 @@ class ipv6_flabel(oxm_tlv):
     @arg body
 
     """
-    def __init__(self, value, hasmask = False):
+    def __init__(self, value, hasmask = False, mask = None):
         if not hasmask:
             oxm_tlv.__init__(self, OFPXMT_OFB_IPV6_FLABEL, hasmask, 4, value)
         else:
-            oxm_tlv.__init__(self, OFPXMT_OFB_IPV6_FLABEL, hasmask, 8, value)            
+            oxm_tlv.__init__(self, OFPXMT_OFB_IPV6_FLABEL, hasmask, 8, value, mask)            
     def show(self, prefix=''):
         outstr = prefix + "ipv6_flabel\n"
         outstr += oxm_tlv.show(self, prefix)
