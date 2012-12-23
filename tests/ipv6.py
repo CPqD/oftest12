@@ -481,14 +481,10 @@ class MatchICMPv6HasMask(basic.SimpleDataPlane):
         eth_type = match.eth_type(IPV6_ETHERTYPE)
         ipv6_src = match.ipv6_src(ipaddr.IPv6Address('fe80::2420:52ff:fe8f:0000'), hasmask = True, 
             mask = ipaddr.IPv6Address('ffff:ffff:ffff:ffff:ffff:ffff:ffff:0000'))
-        ip_proto = match.ip_proto(ICMPV6_PROTOCOL)
-        icmpv6_type = match.icmpv6_type(128)
         
         request.match_fields.tlvs.append(port)
         request.match_fields.tlvs.append(eth_type)
         request.match_fields.tlvs.append(ipv6_src)
-        request.match_fields.tlvs.append(ip_proto)
-        request.match_fields.tlvs.append(icmpv6_type)
         
         act = action.action_output()
         act.port = of_ports[3]
