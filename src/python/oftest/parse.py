@@ -259,12 +259,12 @@ def packet_to_flow_match(packet):
     @param pkt_format Currently only L2 is supported.  Will indicate the 
     overall packet type for parsing
     @return An ofp_match object if successful.  None if format is not
-    recognized.  The wildcards of the match will be cleared for the
-    values extracted from the packet.
+    recognized. If a Vlan ID is present, the match returned will contain 
+    only eth_type, eth_dst, eth_src and Vlan fields.
 
     @todo check min length of packet
     @todo Check if packet is other than L2 format
-    @todo implement other fields covered by OpenFlow 1.2 
+    @todo implement other fields covered by OpenFlow 1.3 
     """
     match_ls = match_list()
     
@@ -273,9 +273,9 @@ def packet_to_flow_match(packet):
         eth_type = match.eth_type(ether.type)
         eth_dst = match.eth_dst(parse_mac(ether.dst))
         eth_src = match.eth_src(parse_mac(ether.src))
-        match_ls.add(eth_type)
-        match_ls.add(eth_dst)
-        match_ls.add(eth_src)
+        match_ls.tlvs.append(eth_type)
+        match_ls.tlvs.append(eth_dst)
+        match_ls.tlvs.append(eth_src)
     else:
         return match_ls
 
@@ -284,25 +284,28 @@ def packet_to_flow_match(packet):
         vlan = packet[Dot1Q:0]
         vlan_vid = match.vlan_vid(vlan.vlan)
         vlan_pcp = match.vlan_pcp(vlan.prio)
-        match_ls.add(vlan_vid)
-        match_ls.add(vlan_pcp)
+        match_ls.tlvs.append(vlan_vid)
+        match_ls.tlvs.append(vlan_pcp)
         vlan_pl = vlan.payload
         while vlan_pl is not None and vlan_pl.name == Dot1Q.name:
             vlan = vlan_pl
             vlan_pl = vlan.payload
         #We need to overwrite the already
         # inserted eth_type    
-        eth_index = match.tlvs.index()
+        # eth_index = match_ls.tlvs.index(match.eth_type(ether.type))
+        eth_type = match.eth_type(ether.type)
+        match_ls.tlvs.remove(eth_type)
         eth_type = match.eth_type(vlan.type)
-        match_ls.tlvs.insert(vlan.type,eth_index)
+        match_ls.tlvs.append(eth_type)
+        # match_ls.tlvs.insert(vlan.type,eth_index)
     #TODO ARP
 
     if MPLS in packet:
         mpls = packet[MPLS:0]
         mpls_label = match.mpls_label(mpls.label)
         mpls_tc =  match.mpls_tc(mpls.cos)
-        match_ls.add(mpls_label)
-        match_ls.add(mpls_tc)
+        match_ls.tlvs.append(mpls_label)
+        match_ls.tlvs.append(mpls_tc)
         return match_ls
 
     if IP in packet:
@@ -311,10 +314,10 @@ def packet_to_flow_match(packet):
         ipv4_dst = match.ipv4_dst(parse_ip(ip.dst))
         ip_dscp =  match.ip_dscp(ip.tos >> 2) 
         ip_ecn =   match.ip_ecn(ip.tos & 0x03)
-        match_ls.add(ipv4_src)
-        match_ls.add(ipv4_dst)
-        match_ls.add(ip_dscp)
-        match_ls.add(ip_ecn)
+        match_ls.tlvs.append(ipv4_src)
+        match_ls.tlvs.append(ipv4_dst)
+        match_ls.tlvs.append(ip_dscp)
+        match_ls.tlvs.append(ip_ecn)
     else:
         return match_ls
     
@@ -323,9 +326,9 @@ def packet_to_flow_match(packet):
         ip_proto = match.ip_proto(6)
         tcp_src = match.tcp_src(tcp.sport)
         tcp_dst = match.tcp_dst(tcp.dport)
-        match_ls.add(ip_proto)
-        match_ls.add(tcp_src)
-        match_ls.add(tcp_dst)
+        match_ls.tlvs.append(ip_proto)
+        match_ls.tlvs.append(tcp_src)
+        match_ls.tlvs.append(tcp_dst)
         return match_ls
 
     if UDP in packet:
@@ -333,9 +336,9 @@ def packet_to_flow_match(packet):
         ip_proto = match.ip_proto(17)
         udp_src = match.tcp_src(udp.sport)
         udp_dst = match.tcp_dst(udp.dport)
-        match_ls.add(ip_proto)
-        match_ls.add(udp_src)
-        match_ls.add(udp_dst)        
+        match_ls.tlvs.append(ip_proto)
+        match_ls.tlvs.append(udp_src)
+        match_ls.tlvs.append(udp_dst)        
         return match_ls
 
     if ICMP in packet:
@@ -343,8 +346,8 @@ def packet_to_flow_match(packet):
         ip_proto = match.ip_proto(1)
         icmp_type = match.icmp_type(icmp.type)
         icmp_code = match.icmp_code(icmp.code)
-        match_ls.add(icmp_type)
-        match_ls.add(icmp_code)        
+        match_ls.tlvs.append(icmp_type)
+        match_ls.tlvs.append(icmp_code)        
         return match_ls
 
     return match_ls

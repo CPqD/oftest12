@@ -623,14 +623,6 @@ struct ofp_table_mod {
 };
 OFP_ASSERT(sizeof(struct ofp_table_mod) == 16);
 
-enum ofp_table_config {
-    OFPTC_TABLE_MISS_CONTROLLER = 0,    /* Send to controller. */
-    OFPTC_TABLE_MISS_CONTINUE = 1 << 0, /* Continue to the next table in the
-                                           pipeline (OpenFlow 1.0 behavior). */
-    OFPTC_TABLE_MISS_DROP = 1 << 1,     /* Drop the packet. */
-    OFPTC_TABLE_MISS_MASK = 3
-};
-
 #define OFP_DEFAULT_PRIORITY 0x8000
 #define OFP_FLOW_PERMANENT 0
 

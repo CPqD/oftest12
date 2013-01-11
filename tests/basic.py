@@ -219,11 +219,6 @@ class PacketIn(SimpleDataPlane):
         # Send packet to dataplane, once to each port
         # Poll controller with expect message type packet in
 
-#        of_ports = basic_port_map.keys()
-#        of_ports.sort()
-#        ing_port = of_ports[0]
-#        egr_port = of_ports[3]
-
         rc = testutils.delete_all_flows(self.controller, basic_logger)
         self.assertEqual(rc, 0, "Failed to delete all flows")
 
@@ -461,6 +456,45 @@ class PortConfigMod(SimpleProtocol):
                              ofp.OFPPC_NO_PACKET_IN, basic_logger)
         self.assertTrue(rv != -1, "Error sending port mod")
         
+
+TABLE_MISS_CONTROLLER = 0,    # Send to controller.
+TABLE_MISS_CONTINUE = 1 << 0, #/* Continue to the next table in the
+                                    #   pipeline (OpenFlow 1.0 behavior). */
+TABLE_MISS_DROP = 1 << 1,     #/* Drop the packet. */
+TABLE_MISS_MASK = 3
+def table_config(parent, set_id = 0, mode = None):
+    """
+    Configure table packet handling
+    """
+    if mode is None :
+        return False
+    request = message.flow_mod()
+    request.match.type = ofp.OFPMT_OXM
+    request.buffer_id = 0xffffffff
+    request.table_id = set_id
+    request.priority = 0
+    inst = instruction.instruction_apply_actions()
+
+    if mode == TABLE_MISS_CONTROLLER:
+        act = action.action_output()
+        act.port = ofp.OFPP_CONTROLLER
+        act.max_len = ofp.OFPCML_NO_BUFFER
+        inst.actions.add(act)
+    elif mode == TABLE_MISS_CONTINUE :
+        inst = instruction.instruction_goto_table()
+        inst.table_id = set_id + 1
+    elif mode == TABLE_MISS_DROP :
+        act = 0
+    else :
+        return False
+
+    parent.assertTrue(request.instructions.add(inst), "Can't add inst")
+    basic_logger.info("Inserting flow")
+    rv = parent.controller.message_send(request)
+    parent.assertTrue(rv != -1, "Error installing flow mod")
+    testutils.do_barrier(parent.controller)
+    return True
+
 class TableModConfig(SimpleProtocol):
     """ Simple table modification
     
@@ -469,12 +503,10 @@ class TableModConfig(SimpleProtocol):
     """        
     def runTest(self):
         basic_logger.info("Running " + str(self))
-        table_mod = message.table_mod()
-        table_mod.table_id = 0 # first table should always exist
-        table_mod.config = ofp.OFPTC_TABLE_MISS_CONTROLLER
         
-        rv = self.controller.message_send(table_mod)
-        self.assertTrue(rv != -1, "Error sending table_mod")
+        rv = table_config(self,1,TABLE_MISS_CONTROLLER)
+
+        self.assertTrue(rv, "Error sending table_mod")
         testutils.do_echo_request_reply_test(self, self.controller)
     
 

@@ -13,7 +13,9 @@ class oxm_tlv:
         self.length = length
         self.value = value
         self.mask = mask
-    
+    def __eq__(self, other):
+        return (self.field == other.field and self.class_ == other.class_)
+
     def pack(self, assertstruct=True):
         
         packed = ""
@@ -285,7 +287,7 @@ class ipv4_src(oxm_tlv):
         if not hasmask:
             oxm_tlv.__init__(self, OFPXMT_OFB_IPV4_SRC, hasmask, 4, value)
         else: 
-            oxm_tlv.__init__(self, OFPXMT_OFB_IPV4_SRC, hasmask, 4, value, mask)
+            oxm_tlv.__init__(self, OFPXMT_OFB_IPV4_SRC, hasmask, 8, value, mask)
     def show(self, prefix=''):
         outstr = prefix + "ipv4_src\n"
         outstr += oxm_tlv.show(self, prefix)
@@ -306,7 +308,7 @@ class ipv4_dst(oxm_tlv):
         if not hasmask:
             oxm_tlv.__init__(self, OFPXMT_OFB_IPV4_DST, hasmask, 4, value)
         else:
-            oxm_tlv.__init__(self, OFPXMT_OFB_IPV4_DST, hasmask, 4, value, mask)
+            oxm_tlv.__init__(self, OFPXMT_OFB_IPV4_DST, hasmask, 8, value, mask)
     def show(self, prefix=''):
         outstr = prefix + "ipv4_dst\n"
         outstr += oxm_tlv.show(self, prefix)

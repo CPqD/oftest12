@@ -7043,16 +7043,8 @@ ofp_group_capabilities_map = {
     8                               : 'OFPGFC_CHAINING_CHECKS'
 }
 
-ofp_table_config = ['OFPTC_TABLE_MISS_CONTROLLER', 'OFPTC_TABLE_MISS_CONTINUE', 'OFPTC_TABLE_MISS_DROP', 'OFPTC_TABLE_MISS_MASK']
-OFPTC_TABLE_MISS_CONTROLLER         = 0
-OFPTC_TABLE_MISS_CONTINUE           = 1
-OFPTC_TABLE_MISS_DROP               = 2
-OFPTC_TABLE_MISS_MASK               = 3
+ofp_table_config = []
 ofp_table_config_map = {
-    0                               : 'OFPTC_TABLE_MISS_CONTROLLER',
-    1                               : 'OFPTC_TABLE_MISS_CONTINUE',
-    2                               : 'OFPTC_TABLE_MISS_DROP',
-    3                               : 'OFPTC_TABLE_MISS_MASK'
 }
 
 ofp_action_type = ['OFPAT_OUTPUT', 'OFPAT_COPY_TTL_OUT', 'OFPAT_COPY_TTL_IN', 'OFPAT_SET_MPLS_TTL', 'OFPAT_DEC_MPLS_TTL', 'OFPAT_PUSH_VLAN', 'OFPAT_POP_VLAN', 'OFPAT_PUSH_MPLS', 'OFPAT_POP_MPLS', 'OFPAT_SET_QUEUE', 'OFPAT_GROUP', 'OFPAT_SET_NW_TTL', 'OFPAT_DEC_NW_TTL', 'OFPAT_SET_FIELD', 'OFPAT_PUSH_PBB', 'OFPAT_POP_PBB', 'OFPAT_EXPERIMENTER']

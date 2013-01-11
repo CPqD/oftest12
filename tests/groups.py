@@ -699,8 +699,8 @@ class GroupProcSimple(GroupTest):
 
         self.send_ctrl_exp_noerror(group_add_msg, 'group add')
 
-        packet_in  = testutils.simple_tcp_packet(tcp_sport=1000)
-        packet_out = testutils.simple_tcp_packet(tcp_sport=2000)
+        packet_in  = testutils.simple_tcp_packet(tcp_src=1000)
+        packet_out = testutils.simple_tcp_packet(tcp_src=2000)
         
         flow_add_msg = \
         testutils.flow_msg_create(self,packet_in,ing_port = 1,action_list = [
@@ -745,8 +745,8 @@ class GroupProcMod(GroupTest):
         self.send_ctrl_exp_noerror(group_mod_msg, 'group mod')
 
 
-        packet_in  = testutils.simple_tcp_packet(tcp_sport=1000)
-        packet_out = testutils.simple_tcp_packet(tcp_sport=3000)
+        packet_in  = testutils.simple_tcp_packet(tcp_src=1000)
+        packet_out = testutils.simple_tcp_packet(tcp_src=3000)
         
         flow_add_msg = \
         testutils.flow_msg_create(self,packet_in,ing_port = 1,action_list = [
@@ -788,8 +788,8 @@ class GroupProcChain(GroupTest):
 
         self.send_ctrl_exp_noerror(group_add_msg1, 'group add')
 
-        packet_in  = testutils.simple_tcp_packet(tcp_sport=1000)
-        packet_out = testutils.simple_tcp_packet(tcp_sport=2000)
+        packet_in  = testutils.simple_tcp_packet(tcp_src=1000)
+        packet_out = testutils.simple_tcp_packet(tcp_src=2000)
         
         flow_add_msg = \
         testutils.flow_msg_create(self,packet_in,ing_port = 1,action_list = [
@@ -836,10 +836,10 @@ class GroupProcAll(GroupTest):
 
         self.send_ctrl_exp_noerror(group_add_msg, 'group add')
 
-        packet_in  = testutils.simple_tcp_packet(tcp_sport=1000)
-        packet_out1 = testutils.simple_tcp_packet(tcp_sport=2000)
-        packet_out2 = testutils.simple_tcp_packet(tcp_sport=3000)
-        packet_out3 = testutils.simple_tcp_packet(tcp_sport=4000)
+        packet_in  = testutils.simple_tcp_packet(tcp_src=1000)
+        packet_out1 = testutils.simple_tcp_packet(tcp_src=2000)
+        packet_out2 = testutils.simple_tcp_packet(tcp_src=3000)
+        packet_out3 = testutils.simple_tcp_packet(tcp_src=4000)
         
         flow_add_msg = \
         testutils.flow_msg_create(self,packet_in,ing_port = 1,action_list = [
@@ -900,10 +900,10 @@ class GroupProcAllChain(GroupTest):
 
         self.send_ctrl_exp_noerror(group_add_msg1, 'group add 1')
 
-        packet_in  = testutils.simple_tcp_packet(tcp_sport=1000)
-        packet_out1 = testutils.simple_tcp_packet(tcp_sport=2000)
-        packet_out2 = testutils.simple_tcp_packet(tcp_sport=3000)
-        packet_out3 = testutils.simple_tcp_packet(tcp_sport=4000)
+        packet_in  = testutils.simple_tcp_packet(tcp_src=1000)
+        packet_out1 = testutils.simple_tcp_packet(tcp_src=2000)
+        packet_out2 = testutils.simple_tcp_packet(tcp_src=3000)
+        packet_out3 = testutils.simple_tcp_packet(tcp_src=4000)
         
         flow_add_msg = \
         testutils.flow_msg_create(self,packet_in,ing_port = 1,action_list = [
@@ -939,8 +939,8 @@ class GroupProcIndirect(GroupTest):
 
         self.send_ctrl_exp_noerror(group_add_msg, 'group add')
 
-        packet_in  = testutils.simple_tcp_packet(tcp_sport=1000)
-        packet_out = testutils.simple_tcp_packet(tcp_sport=2000)
+        packet_in  = testutils.simple_tcp_packet(tcp_src=1000)
+        packet_out = testutils.simple_tcp_packet(tcp_src=2000)
         
         flow_add_msg = \
         testutils.flow_msg_create(self,packet_in,ing_port = 1,action_list = [
@@ -982,10 +982,10 @@ class GroupProcSelect(GroupTest):
 
         self.send_ctrl_exp_noerror(group_add_msg, 'group add')
 
-        packet_in  = testutils.simple_tcp_packet(tcp_sport=1000)
-        packet_out1 = testutils.simple_tcp_packet(tcp_sport=2000)
-        packet_out2 = testutils.simple_tcp_packet(tcp_sport=3000)
-        packet_out3 = testutils.simple_tcp_packet(tcp_sport=4000)
+        packet_in  = testutils.simple_tcp_packet(tcp_src=1000)
+        packet_out1 = testutils.simple_tcp_packet(tcp_src=2000)
+        packet_out2 = testutils.simple_tcp_packet(tcp_src=3000)
+        packet_out3 = testutils.simple_tcp_packet(tcp_src=4000)
         
         flow_add_msg = \
         testutils.flow_msg_create(self,packet_in,ing_port = 1,action_list = [
@@ -1045,7 +1045,7 @@ class GroupStats(GroupTest):
 
         self.send_ctrl_exp_noerror(group_add_msg, 'group add')
 
-        packet_in  = testutils.simple_tcp_packet(tcp_sport=1000)
+        packet_in  = testutils.simple_tcp_packet(tcp_src=1000)
         
         flow_add_msg = \
         testutils.flow_msg_create(self,packet_in,ing_port = 1,action_list = [
@@ -1115,7 +1115,7 @@ class GroupStatsAll(GroupTest):
 
         self.send_ctrl_exp_noerror(group_add_msg2, 'group add 2')
 
-        packet_in  = testutils.simple_tcp_packet(tcp_sport=1000)
+        packet_in  = testutils.simple_tcp_packet(tcp_src=1000)
         
         flow_add_msg1 = \
         testutils.flow_msg_create(self,packet_in,ing_port = 1,action_list = [
@@ -1239,7 +1239,7 @@ class GroupFlowSelect(GroupTest):
 
         self.send_ctrl_exp_noerror(group_add_msg2, 'group add 2')
 
-        packet_in1 = testutils.simple_tcp_packet(tcp_sport=1000)
+        packet_in1 = testutils.simple_tcp_packet(tcp_src=1000)
         
         flow_add_msg1 = \
         testutils.flow_msg_create(self,packet_in1,ing_port = 1,action_list = [
@@ -1249,7 +1249,7 @@ class GroupFlowSelect(GroupTest):
 
         self.send_ctrl_exp_noerror(flow_add_msg1, 'flow add 1')
 
-        packet_in2 = testutils.simple_tcp_packet(tcp_sport=2000)
+        packet_in2 = testutils.simple_tcp_packet(tcp_src=2000)
 
         flow_add_msg2 = \
         testutils.flow_msg_create(self,packet_in2,ing_port = 1,action_list = [
@@ -1259,7 +1259,7 @@ class GroupFlowSelect(GroupTest):
 
         self.send_ctrl_exp_noerror(flow_add_msg2, 'flow add 2')
 
-        packet_in3 = testutils.simple_tcp_packet(tcp_sport=3000)
+        packet_in3 = testutils.simple_tcp_packet(tcp_src=3000)
 
         flow_add_msg3 = \
         testutils.flow_msg_create(self,packet_in3,ing_port = 1,action_list = [
@@ -1269,7 +1269,7 @@ class GroupFlowSelect(GroupTest):
 
         self.send_ctrl_exp_noerror(flow_add_msg3, 'flow add 3')
 
-        packet_in4 = testutils.simple_tcp_packet(tcp_sport=4000)
+        packet_in4 = testutils.simple_tcp_packet(tcp_src=4000)
 
         flow_add_msg4 = \
         testutils.flow_msg_create(self,packet_in4,ing_port = 1,action_list = [
@@ -1308,7 +1308,7 @@ class GroupFlowSelectAll(GroupTest):
 
         self.send_ctrl_exp_noerror(group_add_msg2, 'group add 2')
 
-        packet_in1 = testutils.simple_tcp_packet(tcp_sport=1000)
+        packet_in1 = testutils.simple_tcp_packet(tcp_src=1000)
         
         flow_add_msg1 = \
         testutils.flow_msg_create(self,packet_in1,ing_port = 1,action_list = [
@@ -1318,7 +1318,7 @@ class GroupFlowSelectAll(GroupTest):
 
         self.send_ctrl_exp_noerror(flow_add_msg1, 'flow add 1')
 
-        packet_in2 = testutils.simple_tcp_packet(tcp_sport=2000)
+        packet_in2 = testutils.simple_tcp_packet(tcp_src=2000)
 
         flow_add_msg2 = \
         testutils.flow_msg_create(self,packet_in2,ing_port = 1,action_list = [
@@ -1328,7 +1328,7 @@ class GroupFlowSelectAll(GroupTest):
 
         self.send_ctrl_exp_noerror(flow_add_msg2, 'flow add 2')
 
-        packet_in3 = testutils.simple_tcp_packet(tcp_sport=3000)
+        packet_in3 = testutils.simple_tcp_packet(tcp_src=3000)
 
         flow_add_msg3 = \
         testutils.flow_msg_create(self,packet_in3,ing_port = 1,action_list = [
@@ -1338,7 +1338,7 @@ class GroupFlowSelectAll(GroupTest):
 
         self.send_ctrl_exp_noerror(flow_add_msg3, 'flow add 3')
 
-        packet_in4 = testutils.simple_tcp_packet(tcp_sport=4000)
+        packet_in4 = testutils.simple_tcp_packet(tcp_src=4000)
 
         flow_add_msg4 = \
         testutils.flow_msg_create(self,packet_in4,ing_port = 1,action_list = [
