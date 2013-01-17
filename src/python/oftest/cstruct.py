@@ -2288,14 +2288,14 @@ class ofp_multipart_reply(object):
         """
         self.type = 0
         self.flags = 0
-        self.pad= [0,0,0,0]
+        self.pad_multi_reply= [0,0,0,0]
 
     def __assert(self):
         """Sanity check
         """
-        if(not isinstance(self.pad, list)):
+        if(not isinstance(self.pad_multi_reply, list)):
             return (False, "self.pad is not list as expected.")
-        if(len(self.pad) != 4):
+        if(len(self.pad_multi_reply) != 4):
             return (False, "self.pad is not of size 4 as expected.")
         return (True, None)
 
@@ -2308,7 +2308,7 @@ class ofp_multipart_reply(object):
                 return None
         packed = ""
         packed += struct.pack("!HH", self.type, self.flags)
-        packed += struct.pack("!BBBB", self.pad[0], self.pad[1], self.pad[2], self.pad[3])
+        packed += struct.pack("!BBBB", self.pad_multi_reply[0], self.pad_multi_reply[1], self.pad_multi_reply[2], self.pad_multi_reply[3])
         return packed
 
     def unpack(self, binaryString):
@@ -2325,7 +2325,7 @@ class ofp_multipart_reply(object):
         fmt = '!BBBB'
         start = 4
         end = start + struct.calcsize(fmt)
-        (self.pad[0], self.pad[1], self.pad[2], self.pad[3]) = struct.unpack(fmt, binaryString[start:end])
+        (self.pad_multi_reply[0], self.pad_multi_reply[1], self.pad_multi_reply[2], self.pad_multi_reply[3]) = struct.unpack(fmt, binaryString[start:end])
         return binaryString[8:]
 
     def __len__(self):
@@ -2340,7 +2340,7 @@ class ofp_multipart_reply(object):
         if type(self) != type(other): return False
         if self.type !=  other.type: return False
         if self.flags !=  other.flags: return False
-        if self.pad !=  other.pad: return False
+        if self.pad_multi_reply !=  other.pad_multi_reply: return False
         return True
 
     def __ne__(self, other): return not self.__eq__(other)
@@ -3912,7 +3912,7 @@ class ofp_flow_stats(object):
         Do not unpack empty array used as placeholder
         since they can contain heterogeneous type
         """
-        if (len(binaryString) < 56):
+        if (len(binaryString) < 52):
             return binaryString
         fmt = '!HBBLLHHH'
         start = 0
@@ -3927,12 +3927,12 @@ class ofp_flow_stats(object):
         end = start + struct.calcsize(fmt)
         (self.cookie, self.packet_count, self.byte_count) = struct.unpack(fmt,  binaryString[start:end])
         self.match.unpack(binaryString[48:])
-        return binaryString[56:]
+        return binaryString[52:]
 
     def __len__(self):
         """Return length of message
         """
-        l = 56
+        l = 52
         return l
 
     def __eq__(self, other):
@@ -7617,8 +7617,8 @@ OFP_ERROR_MSG_BYTES = 4
 OFP_EXPERIMENTER_HEADER_BYTES = 8
 OFP_EXPERIMENTER_STATS_HEADER_BYTES = 8
 OFP_FLOW_MOD_BYTES = 44
-OFP_FLOW_REMOVED_BYTES = 48
-OFP_FLOW_STATS_BYTES = 56
+OFP_FLOW_REMOVED_BYTES = 44
+OFP_FLOW_STATS_BYTES = 52
 OFP_FLOW_STATS_REQUEST_BYTES = 36
 OFP_GROUP_DESC_STATS_BYTES = 8
 OFP_GROUP_FEATURES_STATS_BYTES = 40

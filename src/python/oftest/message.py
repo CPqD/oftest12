@@ -2901,8 +2901,19 @@ class flow_stats_entry(ofp_flow_stats):
 
     def pack(self, assertstruct=True):
         self.length = len(self)
+        if not len(self.match_fields):
+            tlv_pad = oxm_tlv(0,0,0,0,0,0)
+            self.match.length += 4
+            self.match_fields.tlvs.append(tlv_pad)
+        else:
+            if len(self.match_fields) > 4:
+                self.match.length +=  len(self.match_fields)      
         packed = ofp_flow_stats.pack(self, assertstruct)
         packed += self.match_fields.pack()
+        padding_size = roundup(len(self.match) + len(self.match_fields),8) - (len(self.match) + len(self.match_fields))
+        padding = [0] * padding_size
+        if padding_size:
+            packed += struct.pack("!" + str(padding_size) + "B", *padding)
         packed += self.instructions.pack()
         if len(packed) != self.length:
             print("ERROR: flow_stats_entry pack length not equal",
@@ -2911,7 +2922,11 @@ class flow_stats_entry(ofp_flow_stats):
 
     def unpack(self, binary_string):
         binary_string = ofp_flow_stats.unpack(self, binary_string)
-        ai_len = self.length - OFP_FLOW_STATS_BYTES
+        binary_string = self.match_fields.unpack(binary_string, bytes = self.match.length - 4)
+        padding = roundup((OFP_FLOW_STATS_BYTES -4) + self.match.length,8) - ((OFP_FLOW_STATS_BYTES - 4) + self.match.length)
+        if padding:
+            binary_string = binary_string[padding:]
+        ai_len = self.length - roundup(OFP_FLOW_STATS_BYTES + self.match.length,8)
         if ai_len < 0:
             print("ERROR: flow_stats_entry unpack length too small",
                   self.length)

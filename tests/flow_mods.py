@@ -54,6 +54,8 @@ class FlowMod_ModifyStrict(basic.SimpleProtocol):
         testutils.do_barrier(self.controller)
         self.assertEqual(rv, 0, "Failed to insert 2nd flow_mod")
         flow_stats = testutils.flow_stats_get(self)
+        print len(flow_stats.stats)
+        print flow_stats.show()
         self.assertEqual(len(flow_stats.stats),1, 
                          "Expected only one flow_mod")
         stat = flow_stats.stats[0]
