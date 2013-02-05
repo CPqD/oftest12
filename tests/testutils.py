@@ -261,7 +261,8 @@ def simple_ipv6_packet(pktlen=100,
                       tcp_src=0,
                       tcp_dst=0, 
                       EH = False, 
-                      EHpkt = IPv6ExtHdrDestOpt()
+                      EHpkt = IPv6ExtHdrDestOpt(),
+                      EHunREP = False
                       ):
 
     """
@@ -294,6 +295,10 @@ def simple_ipv6_packet(pktlen=100,
     # Add IPv6 Extension Headers 
     if EH:
         pkt = pkt / EHpkt
+    
+    if EHunREP:
+        unREP = IPv6ExtHdrHopByHop() / IPv6ExtHdrHopByHop()
+        pkt = pkt / unREP
 
     if (tcp_src >0 and tcp_dst >0):
         pkt = pkt / TCP(sport=tcp_src, dport=tcp_dst)
