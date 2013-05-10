@@ -1,6 +1,7 @@
 import os.path
 import subprocess
 import signal
+import threading
 
 class OFSwitch(object):
     """
@@ -216,11 +217,75 @@ class OFReferenceSwitch13(OFSwitch):
             os.kill(self.ofd_op.pid,signal.SIGTERM)
             #self.ofd_op.kill()   ### apparently Popen.kill() requires python 2.6
 
+class PopenThread(threading.Thread):
+    def __init__(self, ofp, host, port):
+        threading.Thread.__init__(self)
+        self.port= port
+        self.ofp = ofp
+        self.host = host
+
+    def run(self):
+        subprocess.Popen([self.ofp, "unix:/tmp/ofd",
+                "tcp:%s:%d" % (self.host, self.port), "--max-backoff=1"])
+
+class OFReferenceSwitchMultipleCon13(OFSwitch):
+    """
+    Start up Ericsson/OpenFlow/CPqD reference switch 13, with multiple secure channels
+    """
+
+    Name="MultipleCon13"
+
+    def __init__(self,interfaces,config):
+        super(OFReferenceSwitchMultipleCon13, self).__init__(interfaces, config)
+        self.config = config
+        if config.of_dir:
+            self.of_dir = os.path.normpath(config.of_dir)
+        else:
+            self.of_dir = os.path.normpath("../../ofsoftswitch13")
+        self.ofd = os.path.normpath(self.of_dir + "/udatapath/ofdatapath")
+        self.ofp = os.path.normpath(self.of_dir + "/secchan/ofprotocol")
+        self.ofd_op = None
+        self.ofp_slave = None
+
+    def test(self):
+        if not OFSwitch.test(self):
+            return False
+
+        if not os.path.exists(self.ofd):
+            print "Could not find datapath daemon: " + self.ofd
+            return False
+
+        if not os.path.exists(self.ofp):
+            print "Could not find protocol daemon: " + self.ofp
+            return False
+
+        return True
+
+    def start(self):
+        ints = ','.join(self.interfaces)
+        self.ofd_op = subprocess.Popen([self.ofd, "-i", ints, "punix:/tmp/ofd", "-v", ">", "ref13.log"])
+        print "Started ofdatapath on IFs " + ints + \
+                    " with pid " + str(self.ofd_op.pid)
+        #slave controller channel
+        PopenThread(self.ofp, self.config.controller_slave_host, self.config.slave_port).start()
+        #main controller channel
+        subprocess.call([self.ofp, "unix:/tmp/ofd",
+                "tcp:%s:%d" % (self.config.controller_host, self.config.port), "--max-backoff=1"])
+        
+
+    def stop(self):
+        if self.ofd_op:
+            print "Killing ofdatapath on pid: %d" % (self.ofd_op.pid)
+            os.kill(self.ofd_op.pid,signal.SIGTERM)
+            #self.ofd_op.kill()   ### apparently Popen.kill() requires python 2.6
+
+
 MAP = {
     "ofps" : OFPS,
     "none" : OFSwitch,
     "reference" : OFReferenceSwitch,
     "reference12":OFReferenceSwitch12, 
     "reference13":OFReferenceSwitch13, 
+    "MultipleCon13":OFReferenceSwitchMultipleCon13,
     }
     

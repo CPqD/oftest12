@@ -145,21 +145,23 @@ _debug_level_default = DEBUG_LEVELS[_debug_default]
 ##@var config_default
 # The default configuration dictionary for OFT
 config_default = {
-    "param"              : None,
-    "platform"           : "local",
-    "controller_host"    : None,
-    "controller_port"    : 6633,
-    "port_count"         : 4,
-    "base_of_port"       : 1,
-    "base_if_index"      : 1,
-    "test_spec"          : "all",
-    "test_dir"           : ".",
-    "log_file"           : "oft.log",
-    "list"               : False,
-    "debug"              : _debug_default,
-    "dbg_level"          : _debug_level_default,
-    "port_map"           : {},
-    "test_params"        : "None"
+    "param"                 : None,
+    "platform"              : "local",
+    "controller_host"       : None,
+    "controller_slave_host" : None,
+    "controller_port"       : 6633,
+    "controller_slave_port" : 6634,
+    "port_count"            : 4,
+    "base_of_port"          : 1,
+    "base_if_index"         : 1,
+    "test_spec"             : "all",
+    "test_dir"              : ".",
+    "log_file"              : "oft.log",
+    "list"                  : False,
+    "debug"                 : _debug_default,
+    "dbg_level"             : _debug_level_default,
+    "port_map"              : {},
+    "test_params"           : "None"
 }
 
 # Default test priority
@@ -212,6 +214,8 @@ def config_setup(cfg_dflt):
                       help="The IP/name of the test controller host")
     parser.add_option("-p", "--port", dest="controller_port",
                       type="int", help="Port number of the test controller")
+    parser.add_option("-q", "--slave_port", dest="controller_slave_port",
+                      type="int", help="Port number of the test second controller")
     test_list_help = """Indicate tests to run.  Valid entries are "all" (the
         default) or a comma separated list of:
         module            Run all tests in the named module
@@ -237,6 +241,7 @@ def config_setup(cfg_dflt):
                       help="Parameter sent to test (for debugging)")
     parser.add_option("-t", "--test-params",
                       help="Set test parameters: key=val;... See --list")
+
     # Might need this if other parsers want command line
     # parser.allow_interspersed_args = False
     (options, args) = parser.parse_args()

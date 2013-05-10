@@ -1842,6 +1842,196 @@ class multipart_request(ofp_multipart_request):
         """
         return not self.__eq__(other)
     
+class role_request(ofp_role_request):
+    def __init__(self):
+        self.header = ofp_header()
+        ofp_role_request.__init__(self)
+        self.header.type = OFPT_ROLE_REQUEST
+        self.role = OFPCR_ROLE_NOCHANGE
+        self.generation_id = 0
+    
+    #neeeds to be implemented
+
+    def pack(self):
+        """
+        Pack object into string
+
+        @return The packed string which can go on the wire
+
+        """
+        self.header.length = len(self)
+        packed = self.header.pack()
+        packed += ofp_role_request.pack(self)
+        return packed
+
+    def unpack(self, binary_string):
+        """
+        Unpack object from a binary string
+
+        @param binary_string The wire protocol byte string holding the object
+        represented as an array of bytes.
+        @return The remainder of binary_string that was not parsed.
+
+        """
+        binary_string = self.header.unpack(binary_string)
+
+        binary_string = ofp_role_request.unpack(self, binary_string)
+
+        return binary_string
+
+    def __len__(self):
+        """
+        Return the length of this object once packed into a string
+
+        @return An integer representing the number bytes in the packed
+        string.
+
+        """
+        length = OFP_HEADER_BYTES
+
+        length += ofp_role_request.__len__(self)
+        return length
+
+    def show(self, prefix=''):
+        """
+        Generate a string (with multiple lines) describing the contents
+        of the object in a readable manner
+
+        @param prefix Pre-pended at the beginning of each line.
+
+        """
+
+        outstr = prefix + 'Role Request (OFPT_ROLE_REQUEST)\n'
+        prefix += '  '
+        outstr += prefix + 'ofp header\n'
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_role_request.show(self, prefix)
+        ##@todo Fix this circular reference
+        # if len(self.data) > 0:
+            # obj = of_message_parse(self.data)
+            # if obj != None:
+                # outstr += obj.show(prefix)
+            # else:
+                # outstr += prefix + "Unable to parse data\n"
+        return outstr
+
+    def __eq__(self, other):
+        """
+        Return True if self and other hold the same data
+
+        @param other Other object in comparison
+
+        """
+        if type(self) != type(other): return False
+        if not self.header.__eq__(other.header): return False
+
+        if not ofp_role_request.__eq__(self, other): return False
+        return True
+
+    def __ne__(self, other):
+        """
+        Return True if self and other do not hold the same data
+
+        @param other Other object in comparison
+
+        """
+        return not self.__eq__(other)
+
+class role_reply(ofp_role_request):
+    def __init__(self):
+        self.header = ofp_header()
+        ofp_role_request.__init__(self)
+        self.header.type = OFPT_ROLE_REPLY
+        self.role = OFPCR_ROLE_NOCHANGE
+        self.generation_id = 0
+    
+    #neeeds to be implemented
+
+    def pack(self):
+        """
+        Pack object into string
+
+        @return The packed string which can go on the wire
+
+        """
+        self.header.length = len(self)
+        packed = self.header.pack()
+        packed += ofp_role_request.pack(self)
+        return packed
+
+    def unpack(self, binary_string):
+        """
+        Unpack object from a binary string
+
+        @param binary_string The wire protocol byte string holding the object
+        represented as an array of bytes.
+        @return The remainder of binary_string that was not parsed.
+
+        """
+        binary_string = self.header.unpack(binary_string)
+
+        binary_string = ofp_role_request.unpack(self, binary_string)
+
+        return binary_string
+
+    def __len__(self):
+        """
+        Return the length of this object once packed into a string
+
+        @return An integer representing the number bytes in the packed
+        string.
+
+        """
+        length = OFP_HEADER_BYTES
+
+        length += ofp_role_request.__len__(self)
+        return length
+
+    def show(self, prefix=''):
+        """
+        Generate a string (with multiple lines) describing the contents
+        of the object in a readable manner
+
+        @param prefix Pre-pended at the beginning of each line.
+
+        """
+
+        outstr = prefix + 'Role Request (OFPT_ROLE_REQUEST)\n'
+        prefix += '  '
+        outstr += prefix + 'ofp header\n'
+        outstr += self.header.show(prefix + '  ')
+        outstr += ofp_role_request.show(self, prefix)
+        ##@todo Fix this circular reference
+        # if len(self.data) > 0:
+            # obj = of_message_parse(self.data)
+            # if obj != None:
+                # outstr += obj.show(prefix)
+            # else:
+                # outstr += prefix + "Unable to parse data\n"
+        return outstr
+
+    def __eq__(self, other):
+        """
+        Return True if self and other hold the same data
+
+        @param other Other object in comparison
+
+        """
+        if type(self) != type(other): return False
+        if not self.header.__eq__(other.header): return False
+
+        if not ofp_role_request.__eq__(self, other): return False
+        return True
+
+    def __ne__(self, other):
+        """
+        Return True if self and other do not hold the same data
+
+        @param other Other object in comparison
+
+        """
+        return not self.__eq__(other)
+
 
 class packet_in(ofp_packet_in):
     """
@@ -4381,7 +4571,6 @@ class table_features_stats_request(ofp_multipart_request,ofp_table_features):
 
     def __ne__(self, other): return not self.__eq__(other)
 
-
 class table_features_stats_reply(ofp_multipart_reply):
     """
     Wrapper class for table multipart reply
@@ -4479,6 +4668,8 @@ message_type_list = (
     meter_config_stats_reply,
     meter_features_stats_request,    
     meter_features_stats_reply,
+    role_request,
+    role_reply,
     packet_in,
     packet_out,
     port_mod,

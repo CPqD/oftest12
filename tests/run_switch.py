@@ -18,9 +18,11 @@ def parse_args():
     parser.set_defaults(switch="ofps")
     parser.set_defaults(port_count=4)
     parser.set_defaults(controller_host='127.0.0.1')
+    parser.set_defaults(controller_slave_host='127.0.0.1')
     parser.set_defaults(passive_connect=False)
     parser.set_defaults(of_dir=None)
     parser.set_defaults(port=6633)
+    parser.set_defaults(slave_port=6634)
     parser.set_defaults(wait=2)
     parser.add_option("-n", "--port_count", type="int",
                       help="Number of veth pairs to create")
@@ -29,6 +31,9 @@ def parse_args():
     parser.add_option("-o", "--of_dir", 
                       help="OpenFlow root directory for host")
     parser.add_option("-p", "--port", type="int",
+                      help="Port for OFP to listen on/connect to",
+                      dest="passive_connect")
+    parser.add_option("-q", "--slave_port", type="int",
                       help="Port for OFP to listen on/connect to",
                       dest="passive_connect")
     parser.add_option("-P", "--passive-connect", 
