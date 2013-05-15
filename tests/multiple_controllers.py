@@ -175,7 +175,7 @@ class RoleRequestMaster(MultiProtocol):
 
 class EqualRoleMsgs(MultiProtocol):
     """
-
+    Configure Controllers with Equal Role. Send flow mod messages to switch with both.
     """
     def runTest(self):
         of_ports = mult_cont_port_map.keys()
@@ -195,9 +195,59 @@ class EqualRoleMsgs(MultiProtocol):
         rv = self.controller.message_send(request)
         self.assertTrue(rv != -1, "Error installing flow mod")
 
-        rc = testutils.delete_all_flows(self.controller_sec, mult_cont_logger)
+        rc = testutils.delete_all_flows(self.controller_sec, self.logger)
         self.assertEqual(rc, 0, "Failed to delete all flows")
-    
+
+
+class SlaveRoleGetPortConfig(MultiProtocol):
+    """
+    Get port configuration with slave controller
+    """
+    def runTest(self):
+        response = SendRoleRequest(self,self.controller, ofp.OFPCR_ROLE_MASTER)
+        response = SendRoleRequest(self,self.controller_sec, ofp.OFPCR_ROLE_SLAVE)
+        
+        for of_port, _ in mult_cont_port_map.items(): # Grab first port
+            break
+        
+        (_, config, _) = \
+            testutils.port_config_get(self.controller_sec, of_port, self.logger)
+        self.assertTrue(config is not None, "Did not get port config")
+
+
+class SlaveRoleMsgs(MultiProtocol):
+    """
+    Install flow with master controller, attempt to delete all flows with slave controller.
+    Expect error message.
+    """
+    def runTest(self):
+        of_ports = mult_cont_port_map.keys()
+        response = SendRoleRequest(self,self.controller, ofp.OFPCR_ROLE_MASTER)
+        response = SendRoleRequest(self,self.controller_sec, ofp.OFPCR_ROLE_SLAVE)
+        
+        request = message.flow_mod()
+        request.match.type = ofp.OFPMT_OXM
+        port = match.in_port(of_ports[0])
+        request.match_fields.tlvs.append(port)
+        act = action.action_output()
+        act.port = of_ports[2]
+        inst = instruction.instruction_apply_actions()
+        inst.actions.add(act)
+        request.instructions.add(inst)
+        request.buffer_id = 0xffffffff
+        rv = self.controller.message_send(request)
+        self.assertTrue(rv != -1, "Error installing flow mod")
+        
+        rc = testutils.delete_all_flows(self.controller_sec, self.logger)
+        self.assertEqual(rc, 0, "Failed to delete all flows")
+        
+        # expect error reply from switch
+        testutils.error_verify(self,ofp.OFPET_BAD_REQUEST,ofp.OFPBRC_IS_SLAVE,self.controller_sec)
+
+        rc = testutils.delete_all_flows(self.controller, self.logger)
+        self.assertEqual(rc, 0, "Failed to delete all flows")
+
+
 
 if __name__ == "__main__":
     print "Please run through oft script:  ./oft --test_spec=multiple_controller"

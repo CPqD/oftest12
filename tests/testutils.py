@@ -723,7 +723,7 @@ def flow_msg_install(parent, request, clear_table=True):
     parent.assertTrue(rv != -1, "Error installing flow mod")
     do_barrier(parent.controller)
 
-def error_verify(parent, exp_type, exp_code):
+def error_verify(parent, exp_type, exp_code,controller):
     """
     Receive an error msg and verify if it is as expected
 
@@ -731,7 +731,7 @@ def error_verify(parent, exp_type, exp_code):
     @param exp_type Expected error type
     @param exp_code Expected error code
     """
-    (response, raw) = parent.controller.poll(ofp.OFPT_ERROR, 2)
+    (response, raw) = controller.poll(ofp.OFPT_ERROR, 2)
     parent.assertTrue(response is not None, 'No error message received')
 
     if (exp_type is None) or (exp_code is None):
@@ -937,7 +937,7 @@ def flow_match_test_port_pair_vlan(parent, ing_port, egr_port, wildcards=0,
             if check_expire:
                 flow_removed_verify(parent, request, pkt_count=0, byte_count=0)
         elif exp_msg is ofp.OFPT_ERROR:
-            error_verify(parent, exp_msg_type, exp_msg_code)
+            error_verify(parent, exp_msg_type, exp_msg_code,parent.controller)
         else:
             parent.assertTrue(0, "Rcv: Unexpected Message: " + str(exp_msg))
 
@@ -1432,7 +1432,7 @@ def flow_match_test_port_pair_mpls(parent, ing_port, egr_port, wildcards=0,
             if check_expire:
                 flow_removed_verify(parent, request, pkt_count=0, byte_count=0)
         elif exp_msg == ofp.OFPT_ERROR:
-            error_verify(parent, exp_msg_type, exp_msg_code)
+            error_verify(parent, exp_msg_type, exp_msg_code, parent.controller)
         else:
             parent.assertTrue(0, "Rcv: Unexpected Message: " + str(exp_msg))
         (_, rcv_pkt, _) = parent.dataplane.poll(timeout=1)
